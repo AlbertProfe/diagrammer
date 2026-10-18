@@ -27,7 +27,7 @@ Guided intake → Pre-Profile JSON → Planner → DiagramSpec JSON → Renderer
 2. **Pre-Profile JSON.** The backend validates it, fills defaults, and, when the diagram type is Auto, suggests a layout. The planner is not called without a topic.
 3. **Planner.** The JSON planner produces a DiagramSpec: structured text and code only, no raw HTML.
 4. **Renderer.** Deterministic templates are filled from the DiagramSpec by default. The user can opt to have an LLM render instead. That opt-in uses the diagrammer/renderer model role.
-5. **Store.** That version's HTML is stored and served at a public URL. See [Storage](#storage).
+5. **Store.** That version's HTML is stored in the private bucket, and the app serves it at a public URL. See [Storage](#storage).
 
 ### Intake
 
@@ -77,21 +77,25 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
 - One Vaadin Hilla project: a Spring Boot backend and a React frontend in the same project. A separate pure-React app is out of scope.
 - The frontend talks to the backend through Hilla endpoints.
 - The Diagram Orchestrator is that frontend. Intake uses Vaadin chips.
-- Java version, Hilla version, and Spring Boot version are TBD.
+- Dev toolchain: Java 21 (Temurin), Maven 3.9.x, and Node 24 LTS.
+- Hilla version and Spring Boot version are TBD.
 
 ## Auth
 
 - Amazon Cognito is not used for now. It may be considered later.
 - Auth is Spring-style.
-- Users are stored as one JSON credentials file in a folder of the S3 bucket. For v1 the file is plaintext and not encrypted. Albert confirmed that is intentional: early human testing, keep it simple.
+- Users are stored as `auth/users.json` in the S3 bucket. For v1 the file is plaintext and not encrypted. Albert confirmed that is intentional: early human testing, keep it simple.
 - Password hashing (for example BCrypt) is a later backlog item, not part of v1.
 
 ## Storage
 
 - AWS S3 stores the generated documents: the HTML, the Pre-Profile JSON, the DiagramSpec JSON, and similar files.
-- One bucket. A folder per user. Inside it, a subfolder per diagram holding all of that diagram's versions.
-- The JSON credentials file lives in a folder of the same bucket. See [Auth](#auth).
-- A diagram URL is public. Anyone with the link can view it.
+- One private bucket, `diagrammer-albertprofe-docs`, in `eu-central-1` (Frankfurt). Block Public Access is on. SSE-S3 is on. S3 object versioning is on.
+- Key layout:
+  - `auth/users.json`, the credentials file. See [Auth](#auth).
+  - `users/{userId}/diagrams/{diagramId}/v{n}/...`, each diagram version.
+  - `index/diagrams/{diagramId}.json`
+- A diagram URL is public. Anyone with the link can view it. The bucket is private, so the app serves that URL. S3 does not.
 - The URL shape is `/diagrams/{id}` plus a per-version URL. The exact form is TBD.
 
 ## AI model calls
@@ -101,7 +105,8 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
   - **Chat:** the profile assistant.
   - **JSON planner:** produces the DiagramSpec.
   - **Diagrammer/renderer:** used only when the user opts in to LLM rendering. The default path fills templates and does not call a model.
-- AWS access uses one scoped IAM user.
+- AWS access uses the scoped IAM user `diagrammer-app`. It can read, write, list, and delete objects in `diagrammer-albertprofe-docs` only. The region is `eu-central-1`.
+- Bedrock permissions are added once a model is chosen.
 - That user's keys are secrets. See [Secrets](#secrets).
 - Limits and cost are TBD: generation caps, diagram size, timeout, and cost ceiling are not chosen.
 
@@ -121,18 +126,25 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
 
 ## Secrets
 
-- The scoped IAM user's keys are stored as secrets.
-- Keys are never pasted in chat.
-- Keys are never committed to the repository.
-- Which secret store holds them is TBD.
+- The app reads `DIAGRAMMER_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` from the environment.
+- `AWS_REGION` is `eu-central-1`. `DIAGRAMMER_S3_BUCKET` is `diagrammer-albertprofe-docs`.
+- Values are never pasted in chat and never committed.
+- For now the keys are held privately outside the repo. Railway variables are planned for deploys. The secret store is still TBD.
+
+## Release versioning
+
+- App releases start at `v0.0.1`.
+- Issues carry a `release/vX.Y.Z` label.
+- `v0.0.1` is story S1 ([issue #3](https://github.com/AlbertProfe/diagrammer/issues/3), "Log in and see only my diagrams") plus a minimal Hilla skeleton.
+- A release version is not a diagram content version. Diagram versions stay `v1` through `vN` inside a diagram.
 
 ## Repository and pull requests
 
-- The git host is GitHub. The repository is public: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer).
-- The default branch is `main`.
-- A push to `main` is what Railway builds and publishes. See [Deploy pipeline](#deploy-pipeline).
-- Cursor Origin is the codebase and pull-request layer the bots use. Bots use Origin to inspect the repository, diffs, and checks, and to open pull requests.
-- The coder and the reviewer use Origin for pull requests.
+- The git host is GitHub. The repository is public: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer). It is not on Cursor Origin.
+- The default branch is `main`. Nothing goes straight to `main`.
+- GitHub is the single source of truth. A push to `main` is what Railway builds and publishes. See [Deploy pipeline](#deploy-pipeline).
+- Cloud agents clone from GitHub, work on a branch, and open pull requests on GitHub.
+- diag-reviewer comments on those pull requests. Albert reviews and merges on GitHub.
 
 ## Open questions / TBD
 
@@ -143,6 +155,6 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Java, Hilla, and Spring Boot versions.** None of these versions are chosen.
-- **Secret store.** Keys are secrets. The store that holds them is not chosen.
+- **Hilla and Spring Boot versions.** Java is 21 (Temurin). Hilla and Spring Boot versions are not chosen.
+- **Secret store.** Keys are never committed. For now they are held privately outside the repo. Railway variables are planned for deploys. The store is not chosen.
 - **Docker image and Railway service shape.** A push to `main` builds an image and publishes it. What the image contains, and how the Railway service is laid out, are not chosen.

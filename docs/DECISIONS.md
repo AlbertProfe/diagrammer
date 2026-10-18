@@ -133,3 +133,50 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 - **Date:** 2026-10-18
 - **Decision:** The user types the diagram title.
 - **Rationale:** The title is user input. The planner does not invent it.
+
+## 21. GitHub is the source of truth
+
+- **Date:** 2026-10-18
+- **Relation:** Clarifies decision 3
+- **Decision:** The repo is hosted on GitHub. It is not on Cursor Origin. Cloud agents clone from GitHub, work on a branch, and open pull requests on GitHub. diag-reviewer comments on those pull requests. Albert reviews and merges on GitHub. Nothing goes straight to `main`. GitHub is the single source of truth. Railway also builds from it (decisions 2 and 8).
+- **Rationale:** Decision 3 named Origin as the pull-request layer. The working flow is GitHub for the clone, the branch, the pull request, the review, and the merge.
+
+## 22. Release versioning starts at v0.0.1
+
+- **Date:** 2026-10-18
+- **Decision:** App release versioning starts at `v0.0.1`. Releases are tracked with `release/vX.Y.Z` labels on issues. `v0.0.1` is story S1 ([issue #3](https://github.com/AlbertProfe/diagrammer/issues/3), "Log in and see only my diagrams") plus a minimal Hilla skeleton. A release version is separate from a diagram's content versions (`v1` through `vN`) in decision 9.
+- **Rationale:** The first release is the Hilla skeleton and S1. Issue labels are how a release is tracked, and they are not the diagram version numbers.
+
+## 23. AWS region eu-central-1
+
+- **Date:** 2026-10-18
+- **Decision:** AWS resources for Diagrammer use the region `eu-central-1` (Frankfurt).
+- **Rationale:** The bucket and the rest of the AWS setup share one region.
+
+## 24. Private bucket and key layout
+
+- **Date:** 2026-10-18
+- **Relation:** Refines decisions 5 and 12. Names the credentials file from decision 13. Clarifies decision 14.
+- **Decision:** One private bucket, `diagrammer-albertprofe-docs`. Block Public Access is on. SSE-S3 is on. S3 object versioning is on. Key layout: `auth/users.json`, `users/{userId}/diagrams/{diagramId}/v{n}/...`, and `index/diagrams/{diagramId}.json`. Because the bucket is private, the public diagram URLs from decision 14 are served through the app, not directly from S3.
+- **Rationale:** Decisions 5 and 12 chose S3 and a per-user, per-diagram layout. This names the bucket, locks it down, and sets the key prefixes. Decision 13's credentials file is `auth/users.json`. Decision 14 still makes the diagram URL public. The app reads the private object and serves that URL.
+
+## 25. IAM user diagrammer-app
+
+- **Date:** 2026-10-18
+- **Relation:** Refines decision 6
+- **Decision:** AWS access uses the scoped IAM user `diagrammer-app`. That user can read, write, list, and delete objects in `diagrammer-albertprofe-docs` only. Bedrock permissions are added once a model is chosen. Keys stay secrets (decisions 6 and 10): never pasted in chat, never committed.
+- **Rationale:** Decision 6 required a scoped IAM user and left the scope unnamed. The scope is this bucket. Bedrock access waits until a model is chosen.
+
+## 26. Configuration by environment variables
+
+- **Date:** 2026-10-18
+- **Relation:** Clarifies decision 6
+- **Decision:** The app reads `DIAGRAMMER_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` from the environment. Values are never committed.
+- **Rationale:** Decision 6 keeps keys out of the repo. These names are how the app receives the bucket, the region, and the IAM keys. Where the values are stored outside the process is still open.
+
+## 27. Java 21, Maven 3.9, Node 24
+
+- **Date:** 2026-10-18
+- **Relation:** Supersedes TBD: Java version
+- **Decision:** The dev toolchain is Java 21 (Temurin), Maven 3.9.x, and Node 24 LTS. Hilla and Spring Boot versions are still open.
+- **Rationale:** This closes the Java version question. Hilla and Spring Boot versions are not chosen yet.
