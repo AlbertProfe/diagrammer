@@ -180,3 +180,16 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 - **Relation:** Supersedes TBD: Java version
 - **Decision:** The dev toolchain is Java 21 (Temurin), Maven 3.9.x, and Node 24 LTS. Hilla and Spring Boot versions are still open.
 - **Rationale:** This closes the Java version question. Hilla and Spring Boot versions are not chosen yet.
+
+## 28. Application code lives in diagrammer-code-project
+
+- **Date:** 2026-10-18
+- **Decision:** All application code lives in the top-level folder `diagrammer-code-project/`. That folder is the Maven/Hilla project root: `pom.xml`, `src/`, and `frontend/`. It sits next to `docs/`. Docs stay in `docs/`.
+- **Rationale:** The app and the source-of-truth docs share one repository, in separate top-level folders.
+
+## 29. Framework and library versions
+
+- **Date:** 2026-10-18
+- **Relation:** Refines decision 27. Supersedes TBD: Hilla and Spring Boot versions
+- **Decision:** Java 21, Maven 3.9.11 via the `./mvnw` wrapper, Node 24 LTS, Spring Boot 4.1.1, Vaadin Hilla 25.3.1, and AWS SDK for Java v2 2.56.0. Java 21 stays on Temurin (decision 27). These versions were adopted in the v0.0.1 pull request [PR #22](https://github.com/AlbertProfe/diagrammer/pull/22). The default `local` profile uses a fixture `users.json` and needs no AWS. The `s3` profile needs the four environment variables from decision 26.
+- **Rationale:** Decision 27 left Maven on the 3.9 line and left Hilla and Spring Boot open. This pins the versions used for v0.0.1, and names the two run profiles.

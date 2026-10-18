@@ -72,13 +72,24 @@ Templates fix three quirks in the PersonCarDog reference: Next is enabled from t
 
 Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. Whether the renderer computes geometry or keeps hand-placed values is not chosen.
 
+## Repository layout
+
+- Application code lives in `diagrammer-code-project/`, next to `docs/`.
+- That folder is the Maven/Hilla project root: `pom.xml`, `src/`, and `frontend/`.
+- Docs stay in `docs/`.
+
 ## Stack
 
 - One Vaadin Hilla project: a Spring Boot backend and a React frontend in the same project. A separate pure-React app is out of scope.
 - The frontend talks to the backend through Hilla endpoints.
 - The Diagram Orchestrator is that frontend. Intake uses Vaadin chips.
-- Dev toolchain: Java 21 (Temurin), Maven 3.9.x, and Node 24 LTS.
-- Hilla version and Spring Boot version are TBD.
+- Java 21 (Temurin), Maven 3.9.11 via the `./mvnw` wrapper, and Node 24 LTS.
+- Spring Boot 4.1.1, Vaadin Hilla 25.3.1, and AWS SDK for Java v2 2.56.0. These versions were adopted in the v0.0.1 pull request [PR #22](https://github.com/AlbertProfe/diagrammer/pull/22).
+
+## Run profiles
+
+- `local` is the default. It uses a fixture `users.json` and needs no AWS.
+- `s3` needs `DIAGRAMMER_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. See [Secrets](#secrets).
 
 ## Auth
 
@@ -155,6 +166,5 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Hilla and Spring Boot versions.** Java is 21 (Temurin). Hilla and Spring Boot versions are not chosen.
 - **Secret store.** Keys are never committed. For now they are held privately outside the repo. Railway variables are planned for deploys. The store is not chosen.
 - **Docker image and Railway service shape.** A push to `main` builds an image and publishes it. What the image contains, and how the Railway service is laid out, are not chosen.
