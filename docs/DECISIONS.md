@@ -7,6 +7,7 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 - Append a new entry at the end. Do not edit or delete an existing entry.
 - Number it with the next integer. Include the date, a title, the decision, and a short rationale.
 - If a decision changes, add a new entry that supersedes the old one. In the new entry, name the number it replaces. Leave the old entry as it was.
+- If a new entry extends, confirms, or refines an earlier one, or closes an open question, say so in the new entry (`Extends #6`, `Confirms #5`, `Refines #4`, `Supersedes TBD: …`). Do not edit the old entry.
 - After a new entry, update [ARCHITECTURE.md](ARCHITECTURE.md) so the current architecture matches the latest decision.
 
 ## 1. Hilla full-stack
@@ -56,3 +57,79 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 - **Date:** 2026-10-18
 - **Decision:** The repository is the public GitHub repo [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer). The default branch is `main`.
 - **Rationale:** GitHub is the public git host, and `main` is the default branch that Railway builds from.
+
+## 9. Generated HTML pipeline
+
+- **Date:** 2026-10-18
+- **Relation:** Supersedes TBD: diagram format/editor library
+- **Decision:** Diagrammer generates self-contained interactive HTML diagrams in the style of the [PersonCarDog](https://albertprofe.github.io/PersonCarDog/) teaching pages. The pipeline is guided intake (Vaadin chips plus a narrow profile-assistant chat) → Pre-Profile JSON → Planner → DiagramSpec JSON → Renderer → HTML. One Diagram Orchestrator screen has Create and Tinker modes. Every generate creates a new immutable version (`v1` through `vN`). Mermaid and a diagram editor library are closed.
+- **Rationale:** The product is a generated teaching page in the PersonCarDog style. That closes the open question of a diagram format and editor library.
+
+## 10. Grok models on Bedrock
+
+- **Date:** 2026-10-18
+- **Relation:** Extends #6. Supersedes TBD: Bedrock model
+- **Decision:** Model calls use Grok models through AWS Bedrock. Three roles sit behind an `AiClient` interface: chat (the profile assistant), JSON planner (produces the DiagramSpec), and diagrammer/renderer (the model used when the user opts in to LLM rendering, see #11). #6 still holds for access: a scoped IAM user, with keys stored as secrets, never pasted in chat and never committed. There is no separate Grok API key.
+- **Rationale:** #6 chose Bedrock and left the model open. The model is Grok, in three roles, still called through Bedrock.
+
+## 11. Templates by default, LLM render on opt-in
+
+- **Date:** 2026-10-18
+- **Decision:** The renderer fills deterministic templates from the DiagramSpec by default. The user can opt to have an LLM render instead. That opt-in uses the diagrammer/renderer role from #10.
+- **Rationale:** Templates keep the house style on the common path. An LLM render is available only when the user asks for it.
+
+## 12. One S3 bucket, folders per user and diagram
+
+- **Date:** 2026-10-18
+- **Relation:** Confirms #5. Supersedes TBD: S3 bucket layout
+- **Decision:** Storage stays on AWS S3. One bucket. A folder per user, and inside it a subfolder per diagram holding all of that diagram's versions. The URL shape is `/diagrams/{id}` plus a per-version URL. The exact URL form is still TBD.
+- **Rationale:** #5 chose S3 and left the layout open. This sets one bucket and the user/diagram folders. It does not settle the exact spelling of the version URL.
+
+## 13. JSON credentials file
+
+- **Date:** 2026-10-18
+- **Relation:** Refines #4. Supersedes TBD: auth user store. Settles the optional users file in #5.
+- **Decision:** Users are stored as a JSON credentials file in a bucket folder. The file is not encrypted. Albert has confirmed this is intentional for v1: early human testing, keep it simple. Password hashing (for example BCrypt) is a later backlog item, not part of v1.
+- **Rationale:** #4 left the simple store unspecified, and #5 left a users file optional. For v1 the store is this plaintext JSON file. Password hashing waits on the backlog.
+
+## 14. Public diagram URLs
+
+- **Date:** 2026-10-18
+- **Decision:** Diagram URLs are public. Anyone with the link can view the diagram.
+- **Rationale:** Viewing a diagram requires the link only. It does not require a login.
+
+## 15. Light and dark themes
+
+- **Date:** 2026-10-18
+- **Decision:** Diagrams support a light theme and a dark theme.
+- **Rationale:** Both themes are in scope. The PersonCarDog reference is mostly light, with one dark page.
+
+## 16. Safe diagram output
+
+- **Date:** 2026-10-18
+- **Decision:** The DiagramSpec carries text only. The renderer escapes that text. Diagram responses are served with a Content-Security-Policy. When the user opts in to LLM rendering (#11), that HTML is sanitized and the preview is a sandboxed iframe.
+- **Rationale:** Generated pages are HTML served to whoever has the link. Escaping, a CSP, and a sandbox on LLM HTML are the safety bar.
+
+## 17. Layouts in v1
+
+- **Date:** 2026-10-18
+- **Decision:** v1 layouts are horizontal steps, U-shape request/response, and pyramid. Comparison is v2. The catalog will grow.
+- **Rationale:** v1 covers the three interactive layouts in the PersonCarDog reference. Comparison waits until v2.
+
+## 18. Templates fix reference quirks
+
+- **Date:** 2026-10-18
+- **Decision:** Templates fix three quirks in the PersonCarDog reference. Next is enabled from the start. Text is escaped. The page has a back link.
+- **Rationale:** In the reference, Next stays disabled until autoplay starts, some text shows a literal escape sequence, and the diagram pages have no way back.
+
+## 19. English output, i18n-ready
+
+- **Date:** 2026-10-18
+- **Decision:** Diagram output is English only. The app is i18n-ready.
+- **Rationale:** v1 reads in English. The app should be able to take another language later without a redesign.
+
+## 20. User-typed diagram title
+
+- **Date:** 2026-10-18
+- **Decision:** The user types the diagram title.
+- **Rationale:** The title is user input. The planner does not invent it.
