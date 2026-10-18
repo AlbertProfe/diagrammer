@@ -18,3 +18,7 @@ The repository is the public GitHub repo [AlbertProfe/diagrammer](https://github
 ## Rationale
 
 GitHub is the public git host, and `main` is the default branch that Railway builds from.
+
+## Notes
+
+Note (2026-10-18): Deploy builder is now Render, see [0030](../devops/0030-deploy-on-render.md).

@@ -18,3 +18,7 @@ Do not use Amazon Cognito for now. Use Spring-style auth with a simple store. Co
 ## Rationale
 
 Start with Spring-style auth and a simple store. Cognito stays a possible later option. The concrete user store is not chosen yet (see architecture TBD).
+
+## Notes
+
+Note (2026-10-18): User store chosen in [0013](0013-json-credentials-file.md).

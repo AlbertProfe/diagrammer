@@ -34,7 +34,7 @@ Last updated: 2026-10-18
 
 User-generated documents (HTML, JSON, and similar) are stored in AWS S3 ([0005](decisions/aws/0005-s3-for-user-generated-documents.md)).
 
-Model calls go to AWS Bedrock through a scoped IAM user, and that user's keys stay in secrets ([0006](decisions/aws/0006-bedrock-for-model-calls.md)).
+Model calls go to AWS Bedrock through a scoped IAM user, that user's keys stay in secrets, and the model family is Grok via Bedrock ([0006](decisions/aws/0006-bedrock-for-model-calls.md), [0010](decisions/back/0010-grok-models-on-bedrock.md)).
 
 One S3 bucket holds a folder per user and, inside it, a subfolder per diagram for every version ([0012](decisions/aws/0012-one-s3-bucket-folders-per-user-and-diagram.md)).
 
@@ -50,6 +50,7 @@ Open questions:
 
 - Exact diagram URL form. The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen ([0012](decisions/aws/0012-one-s3-bucket-folders-per-user-and-diagram.md), [ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
 - Limits and cost. Generation caps, diagram size, timeout, and cost ceiling are not chosen ([ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
+- The exact Bedrock model id is still open ([0006](decisions/aws/0006-bedrock-for-model-calls.md), [0010](decisions/back/0010-grok-models-on-bedrock.md)).
 - Bedrock permissions are added once a model is chosen ([0025](decisions/aws/0025-iam-user-diagrammer-app.md)).
 
 Last updated: 2026-10-18
@@ -72,7 +73,7 @@ Last updated: 2026-10-18
 
 ### security
 
-Auth is Spring-style with a simple store, and Amazon Cognito is deferred ([0004](decisions/security/0004-auth-without-cognito.md)).
+Auth is Spring-style, Amazon Cognito is deferred, and the user store was chosen in [0013](decisions/security/0013-json-credentials-file.md) ([0004](decisions/security/0004-auth-without-cognito.md)).
 
 Users are stored as a plaintext JSON credentials file in a bucket folder for v1 ([0013](decisions/security/0013-json-credentials-file.md)).
 
@@ -89,9 +90,9 @@ Last updated: 2026-10-18
 
 The shared source of truth is ARCHITECTURE.md and this decision log, and there is no knowledge-graph tool for now ([0007](decisions/process/0007-repo-docs-are-the-shared-memory.md)).
 
-The repository is the public GitHub repo [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), and the default branch is `main` ([0008](decisions/process/0008-public-github-repo-on-main.md)).
+The repository is the public GitHub repo [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), the default branch is `main`, and the deploy builder is Render ([0008](decisions/process/0008-public-github-repo-on-main.md), [0030](decisions/devops/0030-deploy-on-render.md)).
 
-GitHub is the source of truth for the clone, the branch, the pull request, the review, and the merge ([0021](decisions/process/0021-github-is-the-source-of-truth.md)).
+GitHub is the source of truth for the clone, the branch, the pull request, the review, and the merge, and this supersedes the Origin pull-request flow ([0021](decisions/process/0021-github-is-the-source-of-truth.md), [0003](decisions/process/0003-cursor-origin-for-pull-requests.md)).
 
 App release versioning starts at `v0.0.1`, tracked with `release/vX.Y.Z` labels on issues ([0022](decisions/process/0022-release-versioning-starts-at-v0-0-1.md)).
 

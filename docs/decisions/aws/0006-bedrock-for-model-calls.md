@@ -18,3 +18,7 @@ Model calls go to AWS Bedrock. AWS access uses a scoped IAM user. That user's ke
 ## Rationale
 
 Bedrock is the model API. A scoped IAM user is the AWS access path, and its keys stay in secrets so they never appear in chat or in the repository. The Bedrock model is not chosen yet (see architecture TBD).
+
+## Notes
+
+Note (2026-10-18): Model family chosen in [0010](../back/0010-grok-models-on-bedrock.md) (Grok via Bedrock); the exact model id is still open.

@@ -22,3 +22,5 @@ Decision 3 named Origin as the pull-request layer. The working flow is GitHub fo
 ## Notes
 
 - **Relation:** Clarifies decision 3
+
+Note (2026-10-18): This decision supersedes [0003](0003-cursor-origin-for-pull-requests.md) for the pull-request flow; that settles the earlier "Clarifies decision 3" wording.
