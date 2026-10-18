@@ -193,3 +193,10 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 - **Relation:** Refines decision 27. Supersedes TBD: Hilla and Spring Boot versions
 - **Decision:** Java 21, Maven 3.9.11 via the `./mvnw` wrapper, Node 24 LTS, Spring Boot 4.1.1, Vaadin Hilla 25.3.1, and AWS SDK for Java v2 2.56.0. Java 21 stays on Temurin (decision 27). These versions were adopted in the v0.0.1 pull request [PR #22](https://github.com/AlbertProfe/diagrammer/pull/22). There is no default profile. With no profile, the app fails fast unless `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are set, in which case it uses `s3` (credentials still come from decision 26). Local dev is `./mvnw spring-boot:run -Pdev` from `diagrammer-code-project/`. That Maven profile turns on the Spring `local` profile, uses the fixture `users.json` (username `albert`, password `diagrammer`), and needs no AWS. (corrected 2026-10-18)
 - **Rationale:** Decision 27 left Maven on the 3.9 line and left Hilla and Spring Boot open. This pins the versions used for v0.0.1. The run profiles match the merged app: no default, fail fast without the S3 environment variables, and `-Pdev` for the fixture users.
+
+## 30. Deploy on Render
+
+- **Date:** 2026-10-18
+- **Relation:** Supersedes decision 2. Decisions 8 and 21 still stand for GitHub as the source of truth. This entry replaces Railway with Render as the builder those entries named. Clarifies decision 26: those variables are Render environment variables.
+- **Decision:** Deploy on Render, not Railway. Approved by Albert. The Render account is albertprofe. Render deploys from GitHub ([AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`) and builds the Docker image itself, from a Dockerfile in the repo, using Render's Docker runtime. The decision 26 variables are set as Render environment variables and are never committed. diag-devops owns the setup. Render service shape (plan, region, health check) is still open.
+- **Rationale:** Decision 2 chose Railway. The host is now Render. GitHub remains the source Render builds from.

@@ -132,18 +132,18 @@ There is no default profile.
 
 ## Deploy pipeline
 
-- The host is Railway. Render is not the host.
-- GitHub is connected to Railway.
-- A push to `main` builds a Docker image and publishes it on Railway.
-- Railway is secondary for now. The v1 UI can be previewed from cloud agent screenshots or videos, or by running the app locally.
-- Image contents and the Railway service layout, beyond the push-to-`main` build and publish above, are TBD.
+- The host is Render. The Render account is albertprofe.
+- Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`.
+- Render builds the Docker image itself, from a Dockerfile in the repo, using Render's Docker runtime.
+- diag-devops owns the setup.
+- Render service shape (plan, region, health check) is TBD.
 
 ## Secrets
 
 - The app reads `DIAGRAMMER_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` from the environment.
 - `AWS_REGION` is `eu-central-1`. `DIAGRAMMER_S3_BUCKET` is `diagrammer-albertprofe-docs`.
 - Values are never pasted in chat and never committed.
-- For now the keys are held privately outside the repo. Railway variables are planned for deploys. The secret store is still TBD.
+- On Render, these variables are set as Render environment variables. diag-devops owns that setup. See [Deploy pipeline](#deploy-pipeline).
 
 ## Release versioning
 
@@ -156,7 +156,7 @@ There is no default profile.
 
 - The git host is GitHub. The repository is public: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer). It is not on Cursor Origin.
 - The default branch is `main`. Nothing goes straight to `main`.
-- GitHub is the single source of truth. A push to `main` is what Railway builds and publishes. See [Deploy pipeline](#deploy-pipeline).
+- GitHub is the single source of truth. A push to `main` is what Render builds and publishes. See [Deploy pipeline](#deploy-pipeline).
 - Cloud agents clone from GitHub, work on a branch, and open pull requests on GitHub.
 - diag-reviewer comments on those pull requests. Albert reviews and merges on GitHub.
 
@@ -169,5 +169,4 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Secret store.** Keys are never committed. For now they are held privately outside the repo. Railway variables are planned for deploys. The store is not chosen.
-- **Docker image and Railway service shape.** A push to `main` builds an image and publishes it. What the image contains, and how the Railway service is laid out, are not chosen.
+- **Render service shape (plan, region, health check).** Render builds a Docker image from a Dockerfile in the repo. The service plan, region, and health check are not chosen.
