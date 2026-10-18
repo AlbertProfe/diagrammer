@@ -1,0 +1,25 @@
+# Diagrammer on Render. Secrets are set in the Dashboard (sync: false), never in git.
+# autoDeployTrigger: commit turns auto-deploy on for every push to main.
+services:
+  - type: web
+    name: diagrammer
+    runtime: docker
+    region: frankfurt
+    plan: free
+    branch: main
+    autoDeploy: true
+    autoDeployTrigger: commit
+    dockerfilePath: ./diagrammer-code-project/Dockerfile
+    dockerContext: ./diagrammer-code-project
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: s3
+      - key: DIAGRAMMER_S3_BUCKET
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false

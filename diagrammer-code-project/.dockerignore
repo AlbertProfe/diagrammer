@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.vscode
+target
+node_modules
+.vaadin
+src/main/frontend/generated
+src/main/bundles
+vite.generated.ts
+**/*.md
+.env
+.env.*
+*.pem
+*.log
+.DS_Store
