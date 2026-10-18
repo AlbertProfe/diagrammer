@@ -136,10 +136,12 @@ There is no default profile.
 - The public URL is https://diagrammer-wt9s.onrender.com.
 - The service is on the free plan in Frankfurt (`plan: free`, `region: frankfurt` in [`render.yaml`](../render.yaml)), using Render's Docker runtime.
 - Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`. Auto-deploy is on for commits to `main` (`autoDeploy: true`, `autoDeployTrigger: commit`).
+- Auto-deploy follows `buildFilter` in [`render.yaml`](../render.yaml). A change deploys when it matches `diagrammer-code-project/**`. A change that only matches `diagrammer-code-project/**/*.md` does not. Both `paths` and `ignoredPaths` are set, because a Blueprint sync replaces the whole filter. Albert set the same included path and ignored path in the Render dashboard.
+- Those globs are relative to the repository root. `rootDir` is unset. The Docker build inputs stay included: `Dockerfile`, `pom.xml`, `mvnw`, `package.json`, `package-lock.json`, and `src/` (the frontend lives under `src/main/frontend/`).
 - The image is [`diagrammer-code-project/Dockerfile`](../diagrammer-code-project/Dockerfile). [`render.yaml`](../render.yaml) sets `dockerfilePath` to `./diagrammer-code-project/Dockerfile` and `dockerContext` to `./diagrammer-code-project`.
 - The service runs with `SPRING_PROFILES_ACTIVE=s3`. The Dockerfile sets that default, and [`render.yaml`](../render.yaml) sets the same value. The decision 26 variables are listed in `render.yaml` with `sync: false`, so the values are set in Render and are never committed.
 - [`diagrammer-code-project/docker/entrypoint.sh`](../diagrammer-code-project/docker/entrypoint.sh) refuses the `local` and `test` Spring profiles. The dev fixture login cannot start in this image.
-- The health endpoint is `GET /actuator/health`. `render.yaml` sets `healthCheckPath` to `/actuator/health`. Setting that path in the Render dashboard is still pending.
+- The health endpoint is `GET /actuator/health`. `render.yaml` sets `healthCheckPath` to `/actuator/health`. Albert set that path in the Render dashboard.
 - diag-devops owns the setup.
 
 ## Secrets
@@ -173,4 +175,3 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Render dashboard health check.** The app and `render.yaml` use `/actuator/health`. Setting `healthCheckPath` in the Render dashboard is still pending.

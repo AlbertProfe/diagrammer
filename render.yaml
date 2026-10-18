@@ -1,5 +1,7 @@
 # Diagrammer on Render. Secrets are set in the Dashboard (sync: false), never in git.
-# autoDeployTrigger: commit turns auto-deploy on for every push to main.
+# autoDeployTrigger: commit deploys pushes to main that match buildFilter.
+# Paths are relative to the repo root (rootDir is unset). Both lists are set
+# so a Blueprint sync replaces the filter instead of clearing one of them.
 services:
   - type: web
     name: diagrammer
@@ -9,6 +11,11 @@ services:
     branch: main
     autoDeploy: true
     autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - diagrammer-code-project/**
+      ignoredPaths:
+        - diagrammer-code-project/**/*.md
     dockerfilePath: ./diagrammer-code-project/Dockerfile
     dockerContext: ./diagrammer-code-project
     healthCheckPath: /actuator/health
