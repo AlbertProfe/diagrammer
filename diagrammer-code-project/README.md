@@ -64,6 +64,7 @@ Tests use the `test` profile and the classpath fixture. They do not need `DIAGRA
 - logout returns to the login view
 - `CurrentUserEndpoint` returns 401 when nobody is logged in
 - `GET /diagrams/example` returns 404 with the text `Diagram not found` and does not require login
+- a start with no profile and no S3 environment variables fails before the fixture store is loaded
 
 ## S3 user store
 
