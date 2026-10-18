@@ -75,7 +75,8 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
 ## Repository layout
 
 - Application code lives in `diagrammer-code-project/`, next to `docs/`.
-- That folder is the Maven/Hilla project root: `pom.xml`, `src/`, and `frontend/`.
+- That folder is the Maven/Hilla project root: `pom.xml` and `src/`.
+- The frontend lives in `diagrammer-code-project/src/main/frontend/`, not at the project root.
 - Docs stay in `docs/`.
 
 ## Stack
@@ -88,8 +89,10 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
 
 ## Run profiles
 
-- `local` is the default. It uses a fixture `users.json` and needs no AWS.
-- `s3` needs `DIAGRAMMER_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. See [Secrets](#secrets).
+There is no default profile.
+
+- With no profile, the app fails fast unless `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are set. When both are set, it uses the `s3` profile. Credentials still come from `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. See [Secrets](#secrets).
+- Local dev is `./mvnw spring-boot:run -Pdev` from `diagrammer-code-project/`. The Maven `dev` profile turns on the Spring `local` profile for that run. It uses the fixture `users.json` (username `albert`, password `diagrammer`) and needs no AWS.
 
 ## Auth
 

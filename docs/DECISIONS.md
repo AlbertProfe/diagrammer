@@ -184,12 +184,12 @@ Append-only log of project decisions for Diagrammer. This file and [ARCHITECTURE
 ## 28. Application code lives in diagrammer-code-project
 
 - **Date:** 2026-10-18
-- **Decision:** All application code lives in the top-level folder `diagrammer-code-project/`. That folder is the Maven/Hilla project root: `pom.xml`, `src/`, and `frontend/`. It sits next to `docs/`. Docs stay in `docs/`.
+- **Decision:** All application code lives in the top-level folder `diagrammer-code-project/`. That folder is the Maven/Hilla project root (`pom.xml` and `src/`). The frontend lives in `diagrammer-code-project/src/main/frontend/`, not at the project root. The folder sits next to `docs/`. Docs stay in `docs/`. (corrected 2026-10-18)
 - **Rationale:** The app and the source-of-truth docs share one repository, in separate top-level folders.
 
 ## 29. Framework and library versions
 
 - **Date:** 2026-10-18
 - **Relation:** Refines decision 27. Supersedes TBD: Hilla and Spring Boot versions
-- **Decision:** Java 21, Maven 3.9.11 via the `./mvnw` wrapper, Node 24 LTS, Spring Boot 4.1.1, Vaadin Hilla 25.3.1, and AWS SDK for Java v2 2.56.0. Java 21 stays on Temurin (decision 27). These versions were adopted in the v0.0.1 pull request [PR #22](https://github.com/AlbertProfe/diagrammer/pull/22). The default `local` profile uses a fixture `users.json` and needs no AWS. The `s3` profile needs the four environment variables from decision 26.
-- **Rationale:** Decision 27 left Maven on the 3.9 line and left Hilla and Spring Boot open. This pins the versions used for v0.0.1, and names the two run profiles.
+- **Decision:** Java 21, Maven 3.9.11 via the `./mvnw` wrapper, Node 24 LTS, Spring Boot 4.1.1, Vaadin Hilla 25.3.1, and AWS SDK for Java v2 2.56.0. Java 21 stays on Temurin (decision 27). These versions were adopted in the v0.0.1 pull request [PR #22](https://github.com/AlbertProfe/diagrammer/pull/22). There is no default profile. With no profile, the app fails fast unless `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are set, in which case it uses `s3` (credentials still come from decision 26). Local dev is `./mvnw spring-boot:run -Pdev` from `diagrammer-code-project/`. That Maven profile turns on the Spring `local` profile, uses the fixture `users.json` (username `albert`, password `diagrammer`), and needs no AWS. (corrected 2026-10-18)
+- **Rationale:** Decision 27 left Maven on the 3.9 line and left Hilla and Spring Boot open. This pins the versions used for v0.0.1. The run profiles match the merged app: no default, fail fast without the S3 environment variables, and `-Pdev` for the fixture users.
