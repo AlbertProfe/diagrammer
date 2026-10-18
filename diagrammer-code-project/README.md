@@ -91,3 +91,26 @@ SPRING_PROFILES_ACTIVE=s3 ./mvnw spring-boot:run
 Without those variables, or without `auth/users.json` in the bucket, the `s3` profile cannot log anyone in. For a run with no AWS credentials, use `-Pdev` or `SPRING_PROFILES_ACTIVE=local`.
 
 If no Spring profile is set and both `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are present, startup activates `s3` on its own. The access key and secret still come from the default credential provider chain.
+
+## Deploy on Render
+
+The Blueprint at the repository root (`render.yaml`) defines one web service. Render builds it with the Docker runtime from `diagrammer-code-project/Dockerfile`, using that directory as the build context, from branch `main`. Auto-deploy is on (`autoDeployTrigger: commit`). The service is in region `frankfurt` on the `free` plan.
+
+`./mvnw package` is the production build. Vaadin 25 does not use a separate Maven `production` profile: that command writes the optimized frontend bundle and leaves the optional `vaadin-dev` tools out of the jar. The runtime image is a Java 21 JRE. It runs as a non-root user, listens on `0.0.0.0:$PORT` (8080 when `PORT` is unset), and caps the heap with `MaxRAMPercentage` so the process can fit a 512 MB instance.
+
+The image sets `SPRING_PROFILES_ACTIVE=s3`. That is the production user store. The Maven `dev` profile only affects `spring-boot:run`, so it is not in the jar. The container entrypoint also refuses the `local` and `test` profiles, so the fixture user (`albert` / `diagrammer`) cannot be turned on in this deploy.
+
+Render checks `GET /actuator/health`. The probe is unauthenticated and returns `{"status":"UP"}` with no component details. Login still protects the rest of the app. `GET /diagrams/**` stays public and still answers 404 until diagrams exist.
+
+Set these in the Render dashboard. The Blueprint declares them with `sync: false`. Do not commit the values.
+
+| Variable | Role |
+| --- | --- |
+| `DIAGRAMMER_S3_BUCKET` | Private bucket name |
+| `AWS_REGION` | `eu-central-1` |
+| `AWS_ACCESS_KEY_ID` | IAM user `diagrammer-app` access key |
+| `AWS_SECRET_ACCESS_KEY` | IAM user secret |
+
+The Blueprint also sets `SPRING_PROFILES_ACTIVE=s3`. That value is not a secret.
+
+Without `DIAGRAMMER_S3_BUCKET` and `AWS_REGION`, the process exits at startup. It does not load the fixture, and the health endpoint does not come up. With those variables set, the app starts without reading the bucket. S3 is contacted on login, when it reads `auth/users.json`. A dummy key is enough for the process and `/actuator/health` to come up. Login will fail until the bucket holds a real credentials file.

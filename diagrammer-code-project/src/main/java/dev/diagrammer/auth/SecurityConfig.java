@@ -17,8 +17,14 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Public diagram URLs bypass login. The handler answers 404 until diagrams exist.
+        // /actuator/health is the unauthenticated Render probe. No other actuator path is exposed.
         http.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/diagrams", "/diagrams/**").permitAll());
+                auth.requestMatchers(
+                                "/diagrams",
+                                "/diagrams/**",
+                                "/actuator/health",
+                                "/actuator/health/**")
+                        .permitAll());
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer
                 .loginView("/login", "/login")
                 .anyRequest(AuthorizedUrl::authenticated));
