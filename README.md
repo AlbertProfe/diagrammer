@@ -8,3 +8,9 @@ Two docs are the shared source of truth. Every bot on the team (product owner, t
 
 - [Architecture](docs/ARCHITECTURE.md): the intended design
 - [Decisions](docs/DECISIONS.md): the decision log
+
+## Application code
+
+All application code lives in [diagrammer-code-project/](diagrammer-code-project/). The Maven/Hilla project root is that folder (`pom.xml`, `src/`, `mvnw`). Run, build, and test from inside it.
+
+Step-by-step local-run instructions, fixture login, and which profile needs the real S3 bucket are in [diagrammer-code-project/README.md](diagrammer-code-project/README.md).
