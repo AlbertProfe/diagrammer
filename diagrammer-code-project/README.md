@@ -6,14 +6,17 @@ Release v0.0.1 is story S1: log in, see your display name, log out, and land on 
 
 ## What works without AWS
 
-The default profile is `local`. It loads users from `src/main/resources/fixture/users.json` and never calls S3.
+The fixture user store is opt-in. It loads only when you choose the `local` profile (dev) or the `test` profile (smoke tests). It reads `src/main/resources/fixture/users.json` and never calls S3.
 
 These work with no bucket and no AWS credentials:
 
-- `./mvnw spring-boot:run` (local login and the Diagram Orchestrator shell)
+- `./mvnw spring-boot:run -Pdev` (turns on the `local` profile)
+- `SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run`
 - `./mvnw test` and `./mvnw verify` (the `test` profile uses the same fixture)
 
-The `s3` profile is the only path that reads the real bucket. See [S3 user store](#s3-user-store) below.
+A run with no profile does not load the fixture. `java -jar` with no profile, and `./mvnw spring-boot:run` without `-Pdev` or `SPRING_PROFILES_ACTIVE`, fail at startup and tell you to choose `local` or `s3`. If `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are both set and no profile is selected, the app uses the S3 user store instead of failing.
+
+The Maven `dev` profile only affects `spring-boot:run`. It is not baked into a packaged jar.
 
 ## Prerequisites
 
@@ -27,8 +30,10 @@ Maven itself is not required. `./mvnw` is the Maven Wrapper (Maven 3.9.11) check
 
 ```bash
 cd diagrammer-code-project
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Pdev
 ```
+
+`-Pdev` sets the Spring profile `local` for this run. The same opt-in without the Maven profile is `SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run`.
 
 Wait until the log says the application started. Then open http://localhost:8080.
 
@@ -42,7 +47,7 @@ The app redirects to the login view. Sign in with the fixture user:
 
 That password is a local fixture, not a production secret. After login the header shows **Albert** and **Log out**, and the page is the empty Diagram Orchestrator shell.
 
-`./mvnw` with no goals also starts the app. `spring-boot:run` is the default Maven goal.
+`./mvnw -Pdev` is the same one-liner. `spring-boot:run` is the default Maven goal, and `-Pdev` is what turns the fixture on. Without `-Pdev`, that default goal fails closed.
 
 ## Smoke tests
 
@@ -82,4 +87,6 @@ cd diagrammer-code-project
 SPRING_PROFILES_ACTIVE=s3 ./mvnw spring-boot:run
 ```
 
-Without those variables, or without `auth/users.json` in the bucket, the `s3` profile cannot log anyone in. Use the default `local` profile instead.
+Without those variables, or without `auth/users.json` in the bucket, the `s3` profile cannot log anyone in. For a run with no AWS credentials, use `-Pdev` or `SPRING_PROFILES_ACTIVE=local`.
+
+If no Spring profile is set and both `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are present, startup activates `s3` on its own. The access key and secret still come from the default credential provider chain.

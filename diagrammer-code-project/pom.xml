@@ -112,4 +112,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Opt-in fixture store for local dev. Does not apply to java -jar. -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring-boot.run.profiles>local</spring-boot.run.profiles>
+            </properties>
+        </profile>
+    </profiles>
 </project>

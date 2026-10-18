@@ -13,4 +13,4 @@ Two docs are the shared source of truth. Every bot on the team (product owner, t
 
 All application code lives in [diagrammer-code-project/](diagrammer-code-project/). The Maven/Hilla project root is that folder (`pom.xml`, `src/`, `mvnw`). Run, build, and test from inside it.
 
-Step-by-step local-run instructions, fixture login, and which profile needs the real S3 bucket are in [diagrammer-code-project/README.md](diagrammer-code-project/README.md).
+Step-by-step local-run instructions, fixture login, and which profile needs the real S3 bucket are in [diagrammer-code-project/README.md](diagrammer-code-project/README.md). Local dev opts into the fixture with `./mvnw spring-boot:run -Pdev` from that folder. A run with no profile does not load the fixture.
