@@ -83,8 +83,8 @@ Arrow and SVG geometry is TBD. The reference hand-places approximate SVG paths. 
 
 - Amazon Cognito is not used for now. It may be considered later.
 - Auth is Spring-style.
-- Users are stored as one JSON credentials file in a folder of the S3 bucket. Albert's call is that this file is not encrypted.
-- The product owner suggested storing BCrypt password hashes instead (near-zero effort, and it avoids plaintext if the bucket or a URL is exposed). That suggestion is raised with Albert and is still open.
+- Users are stored as one JSON credentials file in a folder of the S3 bucket. For v1 the file is plaintext and not encrypted. Albert confirmed that is intentional: early human testing, keep it simple.
+- Password hashing (for example BCrypt) is a later backlog item, not part of v1.
 
 ## Storage
 
@@ -143,7 +143,6 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Plaintext vs hashed passwords.** The credentials file is JSON and is not encrypted. BCrypt hashes are suggested and not chosen.
 - **Java, Hilla, and Spring Boot versions.** None of these versions are chosen.
 - **Secret store.** Keys are secrets. The store that holds them is not chosen.
 - **Docker image and Railway service shape.** A push to `main` builds an image and publishes it. What the image contains, and how the Railway service is laid out, are not chosen.
