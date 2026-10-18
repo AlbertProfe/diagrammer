@@ -132,11 +132,15 @@ There is no default profile.
 
 ## Deploy pipeline
 
-- The host is Render. The Render account is albertprofe.
-- Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`.
-- Render builds the Docker image itself, from a Dockerfile in the repo, using Render's Docker runtime.
+- The host is Render. The Render account is albertprofe. The service name is `diagrammer`.
+- The public URL is https://diagrammer-wt9s.onrender.com.
+- The service is on the free plan in Frankfurt (`plan: free`, `region: frankfurt` in [`render.yaml`](../render.yaml)), using Render's Docker runtime.
+- Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`. Auto-deploy is on for commits to `main` (`autoDeploy: true`, `autoDeployTrigger: commit`).
+- The image is [`diagrammer-code-project/Dockerfile`](../diagrammer-code-project/Dockerfile). [`render.yaml`](../render.yaml) sets `dockerfilePath` to `./diagrammer-code-project/Dockerfile` and `dockerContext` to `./diagrammer-code-project`.
+- The service runs with `SPRING_PROFILES_ACTIVE=s3`. The Dockerfile sets that default, and [`render.yaml`](../render.yaml) sets the same value. The decision 26 variables are listed in `render.yaml` with `sync: false`, so the values are set in Render and are never committed.
+- [`diagrammer-code-project/docker/entrypoint.sh`](../diagrammer-code-project/docker/entrypoint.sh) refuses the `local` and `test` Spring profiles. The dev fixture login cannot start in this image.
+- The health endpoint is `GET /actuator/health`. `render.yaml` sets `healthCheckPath` to `/actuator/health`. Setting that path in the Render dashboard is still pending.
 - diag-devops owns the setup.
-- Render service shape (plan, region, health check) is TBD.
 
 ## Secrets
 
@@ -169,4 +173,4 @@ Not decided. Do not treat any item here as a choice.
 - **Spring Boot and Python topic placeholders.** Java, ML, and React placeholders are set. These two are not.
 - **Diagram deletion.** Versions are immutable. Whether a whole diagram can be deleted is not chosen.
 - **Exact diagram URL form.** The shape is `/diagrams/{id}` plus a per-version URL. The exact path is not chosen.
-- **Render service shape (plan, region, health check).** Render builds a Docker image from a Dockerfile in the repo. The service plan, region, and health check are not chosen.
+- **Render dashboard health check.** The app and `render.yaml` use `/actuator/health`. Setting `healthCheckPath` in the Render dashboard is still pending.
