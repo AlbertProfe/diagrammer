@@ -1,10 +1,10 @@
 # Architecture
 
-Intended architecture for Diagrammer. It records only decisions already made in [DECISIONS.md](DECISIONS.md). Anything not settled there is listed under [Open questions / TBD](#open-questions--tbd) and is not a decision.
+Intended architecture for Diagrammer. It records only decisions already made in the [decision log](DECISIONS.md). Each decision is a file under [docs/decisions/](decisions/). Anything not settled there is listed under [Open questions / TBD](#open-questions--tbd) and is not a decision.
 
 This file is the current picture. When a later decision changes the design, update this file to match. The decision log stays append-only.
 
-There is no knowledge-graph tool. This file and the decision log are the shared source of truth. Every bot (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads both before working.
+There is no knowledge-graph tool. This file and the [decision log](DECISIONS.md) are the shared source of truth. Every bot (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads both before working.
 
 ## Product
 
@@ -132,16 +132,16 @@ There is no default profile.
 
 ## Deploy pipeline
 
-- The host is Render. The Render account is albertprofe. The service name is `diagrammer`.
+- The host is Render ([0030](decisions/devops/0030-deploy-on-render.md)). The Render account is albertprofe. The service name is `diagrammer`.
 - The public URL is https://diagrammer-wt9s.onrender.com.
 - The service is on the free plan in Frankfurt (`plan: free`, `region: frankfurt` in [`render.yaml`](../render.yaml)), using Render's Docker runtime.
 - Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`. Auto-deploy is on for commits to `main` (`autoDeploy: true`, `autoDeployTrigger: commit`).
-- Auto-deploy follows `buildFilter` in [`render.yaml`](../render.yaml). A change deploys when it matches `diagrammer-code-project/**`. A change that only matches `diagrammer-code-project/**/*.md` does not. Both `paths` and `ignoredPaths` are set, because a Blueprint sync replaces the whole filter. Albert set the same included path and ignored path in the Render dashboard.
+- Auto-deploy follows `buildFilter` in [`render.yaml`](../render.yaml). A change deploys when it matches `diagrammer-code-project/**`. A change that only matches `diagrammer-code-project/**/*.md` does not. Both `paths` and `ignoredPaths` are set, because a Blueprint sync replaces the whole filter. Albert set the same included path and ignored path in the Render dashboard ([0032](decisions/devops/0032-render-deploys-only-for-app-changes.md)).
 - Those globs are relative to the repository root. `rootDir` is unset. The Docker build inputs stay included: `Dockerfile`, `pom.xml`, `mvnw`, `package.json`, `package-lock.json`, and `src/` (the frontend lives under `src/main/frontend/`).
 - The image is [`diagrammer-code-project/Dockerfile`](../diagrammer-code-project/Dockerfile). [`render.yaml`](../render.yaml) sets `dockerfilePath` to `./diagrammer-code-project/Dockerfile` and `dockerContext` to `./diagrammer-code-project`.
 - The service runs with `SPRING_PROFILES_ACTIVE=s3`. The Dockerfile sets that default, and [`render.yaml`](../render.yaml) sets the same value. The decision 26 variables are listed in `render.yaml` with `sync: false`, so the values are set in Render and are never committed.
 - [`diagrammer-code-project/docker/entrypoint.sh`](../diagrammer-code-project/docker/entrypoint.sh) refuses the `local` and `test` Spring profiles. The dev fixture login cannot start in this image.
-- The health endpoint is `GET /actuator/health`. `render.yaml` sets `healthCheckPath` to `/actuator/health`. Albert set that path in the Render dashboard.
+- The health endpoint is `GET /actuator/health`. `render.yaml` sets `healthCheckPath` to `/actuator/health`. Albert set that path in the Render dashboard. The redeploy was verified 200 UP at 15:42 Europe/Madrid on 2026-10-18 ([0031](decisions/devops/0031-render-service-shape.md)).
 - diag-devops owns the setup.
 
 ## Secrets
