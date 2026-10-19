@@ -13,7 +13,7 @@ The decision files under `docs/decisions/` and [ARCHITECTURE.md](ARCHITECTURE.md
 | [devops](#devops) | [0027](decisions/devops/0027-java-21-maven-3-9-node-24.md), [0029](decisions/devops/0029-framework-and-library-versions.md), [0030](decisions/devops/0030-deploy-on-render.md), [0031](decisions/devops/0031-render-service-shape.md), [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md) | [0002](decisions/devops/0002-deploy-on-railway.md) | 0 | 2026-10-18 |
 | [security](#security) | [0004](decisions/security/0004-auth-without-cognito.md), [0013](decisions/security/0013-json-credentials-file.md), [0016](decisions/security/0016-safe-diagram-output.md) | — | Amazon Cognito may be considered later; password hashing backlog | 2026-10-18 |
 | [process](#process) | [0007](decisions/process/0007-repo-docs-are-the-shared-memory.md), [0008](decisions/process/0008-public-github-repo-on-main.md), [0021](decisions/process/0021-github-is-the-source-of-truth.md), [0022](decisions/process/0022-release-versioning-starts-at-v0-0-1.md), [0028](decisions/process/0028-application-code-in-diagrammer-code-project.md) | [0003](decisions/process/0003-cursor-origin-for-pull-requests.md) | 0 | 2026-10-18 |
-| [product](#product) | [0009](decisions/product/0009-generated-html-pipeline.md), [0011](decisions/product/0011-templates-by-default-llm-render-on-opt-in.md), [0014](decisions/product/0014-public-diagram-urls.md), [0017](decisions/product/0017-layouts-in-v1.md), [0018](decisions/product/0018-templates-fix-reference-quirks.md), [0019](decisions/product/0019-english-output-i18n-ready.md), [0020](decisions/product/0020-user-typed-diagram-title.md) | — | Spring Boot and Python topic placeholders; diagram deletion | 2026-10-18 |
+| [product](#product) | [0009](decisions/product/0009-generated-html-pipeline.md), [0011](decisions/product/0011-templates-by-default-llm-render-on-opt-in.md), [0014](decisions/product/0014-public-diagram-urls.md), [0017](decisions/product/0017-layouts-in-v1.md), [0018](decisions/product/0018-templates-fix-reference-quirks.md), [0019](decisions/product/0019-english-output-i18n-ready.md), [0020](decisions/product/0020-user-typed-diagram-title.md), [0033](decisions/product/0033-pre-profile-chip-values.md) | — | Spring Boot and Python topic placeholders; diagram deletion | 2026-10-19 |
 
 ### architecture
 
@@ -129,12 +129,14 @@ Diagram output is English only, and the app is i18n-ready ([0019](decisions/prod
 
 The user types the diagram title ([0020](decisions/product/0020-user-typed-diagram-title.md)).
 
+Pre-Profile chips are domain `java` | `spring-boot` | `python` | `ml` | `react`, goal `explain-flow` | `use-case` | `compare` | `layers` | `other`, interactivity `static` | `step-by-step` | `multi-scenario`, type `auto` | `horizontal-steps` | `u-shape` | `pyramid`, depth `overview` | `with-code` | `with-code-parallels`, and audience `beginner` | `intermediate`. `multi-scenario` is allowed only with `u-shape` or `auto`. Goal `compare` forces type `auto` and disables `horizontal-steps`, `u-shape`, and `pyramid`. `static` and `step-by-step` are allowed with every type. Comparison is v2 and is not a type in v0.0.2. The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded ([0033](decisions/product/0033-pre-profile-chip-values.md)).
+
 Open questions:
 
 - Spring Boot and Python topic placeholders. Java, ML, and React placeholders are set. These two are not ([ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
 - Diagram deletion. Versions are immutable. Whether a whole diagram can be deleted is not chosen ([0009](decisions/product/0009-generated-html-pipeline.md), [ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
 
-Last updated: 2026-10-18
+Last updated: 2026-10-19
 
 ## How to add a decision
 
@@ -207,6 +209,7 @@ Active decisions only.
 - [0018 Templates fix reference quirks](decisions/product/0018-templates-fix-reference-quirks.md)
 - [0019 English output, i18n-ready](decisions/product/0019-english-output-i18n-ready.md)
 - [0020 User-typed diagram title](decisions/product/0020-user-typed-diagram-title.md)
+- [0033 Pre-Profile chip values](decisions/product/0033-pre-profile-chip-values.md)
 
 ## History
 
@@ -244,3 +247,4 @@ Active decisions only.
 | [0030](decisions/devops/0030-deploy-on-render.md) | devops | [Deploy on Render](decisions/devops/0030-deploy-on-render.md) | active |
 | [0031](decisions/devops/0031-render-service-shape.md) | devops | [Render service shape](decisions/devops/0031-render-service-shape.md) | active |
 | [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md) | devops | [Render deploys only for app changes](decisions/devops/0032-render-deploys-only-for-app-changes.md) | active |
+| [0033](decisions/product/0033-pre-profile-chip-values.md) | product | [Pre-Profile chip values](decisions/product/0033-pre-profile-chip-values.md) | active |

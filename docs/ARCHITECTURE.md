@@ -31,21 +31,31 @@ Guided intake → Pre-Profile JSON → Planner → DiagramSpec JSON → Renderer
 
 ### Intake
 
-Chips:
+Chips ([0033](decisions/product/0033-pre-profile-chip-values.md)):
 
 - **domain:** `java` (default), `spring-boot`, `python`, `ml`, `react`
-- **goal:** `explain-flow` (default), `walk-through-use-case`, `compare-concepts`, `show-layers`, `other` (the user phrases it, and the assistant maps it when it can)
+- **goal:** `explain-flow` (default), `use-case`, `compare`, `layers`, `other` (the user phrases it, and the assistant maps it when it can)
 - **interactivity:** `static`, `step-by-step` (default), `multi-scenario`
-- **diagram type:** `horizontal-steps`, `u-shape`, `pyramid`, `comparison`, `auto` (default)
+- **type:** `auto` (default), `horizontal-steps`, `u-shape`, `pyramid`
 - **depth:** `overview`, `with-code` (default), `with-code-parallels`
-- **audience:** `beginner` (default), `intermediate` (optional)
+- **audience:** `beginner` (default), `intermediate`
 - **topic:** one sentence, required. This is the generate gate.
 - **refinements:** optional notes from the chat
 - **parentVersion:** set in Tinker mode so the new version keeps its lineage
 
 The diagram title is separate from the topic. The user types the title.
 
-When the type is Auto, the suggested layout is explain-flow → horizontal steps, walk-through-use-case → U-shape, show-layers → pyramid, compare-concepts → comparison.
+`multi-scenario` is allowed only with `u-shape` or `auto`.
+
+Goal `compare` forces type `auto` and disables `horizontal-steps`, `u-shape`, and `pyramid`.
+
+`static` and `step-by-step` are allowed with every type.
+
+The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded by `use-case`, `compare`, and `layers`.
+
+Comparison is a v2 / future layout. It is not a type chip in v0.0.2.
+
+When the type is Auto, the suggested layout is `explain-flow` → horizontal steps, `use-case` → U-shape, and `layers` → pyramid. Suggesting comparison for `compare` waits until that v2 layout exists.
 
 Topic placeholders the chat can show:
 
@@ -56,7 +66,7 @@ Topic placeholders the chat can show:
 
 ### DiagramSpec
 
-The planner's JSON names the layout, the nodes and edges, and either steps or scenarios, plus content blocks such as facts, paragraphs, code, analogies, and framework parallels. The renderer escapes every value. The comparison layout is v2, even if a profile names it.
+The planner's JSON names the layout, the nodes and edges, and either steps or scenarios, plus content blocks such as facts, paragraphs, code, analogies, and framework parallels. The renderer escapes every value. Comparison is a v2 layout and is not a Pre-Profile type ([0017](decisions/product/0017-layouts-in-v1.md), [0033](decisions/product/0033-pre-profile-chip-values.md)).
 
 ## Layouts and templates
 
@@ -66,7 +76,7 @@ v1 layouts:
 - U-shape request/response
 - Pyramid
 
-Comparison is v2. The catalog will grow.
+Comparison is v2 / future. It is not a Pre-Profile type chip in v0.0.2 ([0033](decisions/product/0033-pre-profile-chip-values.md)). The catalog will grow.
 
 Templates fix three quirks in the PersonCarDog reference: Next is enabled from the start, text is escaped, and the page has a back link.
 
