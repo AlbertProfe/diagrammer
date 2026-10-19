@@ -47,6 +47,10 @@ The diagram title is separate from the topic. The user types the title.
 
 `multi-scenario` is allowed only with `u-shape` or `auto`.
 
+Goal `compare` forces type `auto` and disables `horizontal-steps`, `u-shape`, and `pyramid`.
+
+`static` and `step-by-step` are allowed with every type.
+
 The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded by `use-case`, `compare`, and `layers`.
 
 Comparison is a v2 / future layout. It is not a type chip in v0.0.2.

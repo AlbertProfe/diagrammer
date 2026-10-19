@@ -129,7 +129,7 @@ Diagram output is English only, and the app is i18n-ready ([0019](decisions/prod
 
 The user types the diagram title ([0020](decisions/product/0020-user-typed-diagram-title.md)).
 
-Pre-Profile chips are domain `java` | `spring-boot` | `python` | `ml` | `react`, goal `explain-flow` | `use-case` | `compare` | `layers` | `other`, interactivity `static` | `step-by-step` | `multi-scenario`, type `auto` | `horizontal-steps` | `u-shape` | `pyramid`, depth `overview` | `with-code` | `with-code-parallels`, and audience `beginner` | `intermediate`. `multi-scenario` is allowed only with `u-shape` or `auto`. Comparison is v2 and is not a type in v0.0.2. The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded ([0033](decisions/product/0033-pre-profile-chip-values.md)).
+Pre-Profile chips are domain `java` | `spring-boot` | `python` | `ml` | `react`, goal `explain-flow` | `use-case` | `compare` | `layers` | `other`, interactivity `static` | `step-by-step` | `multi-scenario`, type `auto` | `horizontal-steps` | `u-shape` | `pyramid`, depth `overview` | `with-code` | `with-code-parallels`, and audience `beginner` | `intermediate`. `multi-scenario` is allowed only with `u-shape` or `auto`. Goal `compare` forces type `auto` and disables `horizontal-steps`, `u-shape`, and `pyramid`. `static` and `step-by-step` are allowed with every type. Comparison is v2 and is not a type in v0.0.2. The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded ([0033](decisions/product/0033-pre-profile-chip-values.md)).
 
 Open questions:
 
