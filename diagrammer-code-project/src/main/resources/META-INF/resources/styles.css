@@ -40,12 +40,142 @@ body,
 }
 
 .orchestrator h1 {
-  margin: 0 0 0.5rem;
+  margin: 0;
   font-size: 1.6rem;
   font-weight: 600;
 }
 
-.orchestrator p {
+.orchestrator-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 0.7fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.intake-panel,
+.assistant-panel {
+  min-width: 0;
+}
+
+.intake-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.assistant-panel {
+  border: 1px solid var(--lumo-contrast-10pct, #e2e2e2);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  background: var(--lumo-contrast-5pct, #f6f6f6);
+  min-height: 12rem;
+}
+
+.assistant-panel h2,
+.pre-profile h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.orchestrator p,
+.generate-hint {
   margin: 0;
   color: var(--lumo-secondary-text-color, #555);
+}
+
+.chip-group::part(group-field) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip-group::part(label) {
+  font-weight: 600;
+}
+
+.chip-group vaadin-radio-button {
+  margin: 0;
+  border: 1px solid var(--lumo-contrast-30pct, #c8c8c8);
+  border-radius: 999px;
+  padding: 0.1rem 0.75rem;
+  background: var(--lumo-base-color, #fff);
+}
+
+.chip-group vaadin-radio-button::part(radio) {
+  display: none;
+}
+
+.chip-group vaadin-radio-button[checked] {
+  background: var(--lumo-primary-color, #1676f3);
+  border-color: var(--lumo-primary-color, #1676f3);
+}
+
+.chip-group vaadin-radio-button[checked]::part(label) {
+  color: var(--lumo-primary-contrast-color, #fff);
+}
+
+.chip-group vaadin-radio-button[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  /* Lumo sets pointer-events: none on a disabled radio, which also blocks the tooltip. */
+  pointer-events: auto !important;
+}
+
+.chip-group vaadin-radio-button[disabled] input {
+  pointer-events: none;
+}
+
+.chip-group vaadin-radio-button[disabled]::part(label) {
+  cursor: not-allowed;
+}
+
+.advanced {
+  border-top: 1px solid var(--lumo-contrast-10pct, #e2e2e2);
+  padding-top: 0.35rem;
+}
+
+.pre-profile {
+  border: 1px solid var(--lumo-contrast-10pct, #e2e2e2);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem 1rem;
+  background: var(--lumo-base-color, #fff);
+}
+
+.pre-profile dl {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: 0.35rem 0.75rem;
+  margin: 0;
+}
+
+.pre-profile-row {
+  display: contents;
+}
+
+.pre-profile dt {
+  color: var(--lumo-secondary-text-color, #555);
+}
+
+.pre-profile dd {
+  margin: 0;
+}
+
+.pre-profile dd.unset {
+  color: var(--lumo-secondary-text-color, #555);
+  font-style: italic;
+}
+
+.generate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (max-width: 800px) {
+  .orchestrator-columns {
+    grid-template-columns: 1fr;
+  }
 }

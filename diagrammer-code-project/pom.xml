@@ -13,7 +13,7 @@
 
     <groupId>dev.diagrammer</groupId>
     <artifactId>diagrammer</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>Diagrammer</name>
     <description>Vaadin Hilla app for creating and storing diagrams.</description>
 
@@ -90,6 +90,12 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.63.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
