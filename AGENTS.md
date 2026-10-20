@@ -1,6 +1,8 @@
 # Diagrammer
 
-Diagrammer generates self-contained interactive HTML diagrams in the style of the PersonCarDog teaching pages. v0.0.2 is login plus the Diagram Orchestrator intake.
+Diagrammer generates self-contained interactive HTML diagrams in the style of the PersonCarDog teaching pages. v0.0.4 is the diagram title, the Confirm & Generate gate, and the profile-assistant chat.
+
+The chat uses a scripted `AiClient`. That bean is the default when `diagrammer.bedrock.enabled` is unset or false, including `./mvnw spring-boot:run -Pdev` and `./mvnw test`. It does not call AWS. The chat panel shows an offline-assistant note.
 
 Before working, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DECISIONS.md](docs/DECISIONS.md), and [docs/CODEMAP.md](docs/CODEMAP.md).
 

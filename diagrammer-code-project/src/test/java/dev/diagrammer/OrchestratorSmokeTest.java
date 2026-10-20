@@ -108,6 +108,7 @@ class OrchestratorSmokeTest {
         org.assertj.core.api.Assertions.assertThat(card("theme")).isEqualTo("Light");
         org.assertj.core.api.Assertions.assertThat(card("audience")).isEqualTo("Beginner");
         org.assertj.core.api.Assertions.assertThat(card("topic")).isEqualTo("not set yet");
+        org.assertj.core.api.Assertions.assertThat(card("refinements")).isEqualTo("not set yet");
 
         org.assertj.core.api.Assertions.assertThat(wire("domain")).isEqualTo("java");
         org.assertj.core.api.Assertions.assertThat(wire("goal")).isEqualTo("explain-flow");
@@ -120,7 +121,10 @@ class OrchestratorSmokeTest {
         assertThat(page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Confirm & Generate").setExact(true)))
                 .isDisabled();
         assertThat(page.locator("#generate-hint")).hasText("Title and Topic are needed.");
-        assertThat(page.getByText("Profile assistant coming soon")).isVisible();
+        assertThat(page.locator("vaadin-text-field.diagram-title input")).hasValue("");
+        assertThat(page.locator(".assistant-offline"))
+                .hasText("Offline assistant. Replies are scripted until a model is connected.");
+        assertThat(page.locator("[data-kind='greeting']")).containsText("How adopt-dog travels from CLI to Repository");
         org.assertj.core.api.Assertions.assertThat(previewTheme()).isEqualTo("light");
         org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview")).isEqualTo("rgb(241, 245, 249)");
         org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview-action")).isEqualTo("rgb(59, 130, 246)");

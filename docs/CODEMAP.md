@@ -1,6 +1,6 @@
 # Code map
 
-Last updated: 2026-10-20 (v0.0.3)
+Last updated: 2026-10-20 (v0.0.4)
 
 Skimmable map of `diagrammer-code-project/` on main. One line per item. Intended design that is not implemented is listed under [Not in the code yet](#not-in-the-code-yet).
 
@@ -9,13 +9,14 @@ Skimmable map of `diagrammer-code-project/` on main. One line per item. Intended
 | Package | What it does |
 | --- | --- |
 | `dev.diagrammer` | Spring Boot entry point and Vaadin app shell configurator. |
+| `dev.diagrammer.assistant` | Chat role behind `AiClient`. The scripted client is the default when Bedrock is not enabled (`@NonNullApi`). |
 | `dev.diagrammer.auth` | Login, the user store, the S3 client, and the startup profile guard. |
 | `dev.diagrammer.endpoint` | Hilla `@BrowserCallable` endpoints (`@NonNullApi`). |
 | `dev.diagrammer.profile` | Pre-Profile chip model and combination rules (`@NonNullApi`). |
 | `dev.diagrammer.theme` | The shared diagram palette. It reads `diagram-theme.css` and does not copy the colors. |
 | `dev.diagrammer.web` | Placeholder HTTP filter for public `/diagrams/**`. |
 
-There is no Bedrock package, no planner package, and no renderer package.
+There is no Bedrock client, no planner package, and no renderer package. `diagrammer.bedrock.enabled` is unset, so `AiClientConfiguration` registers `ScriptedAiClient` only.
 
 ## Main Java classes
 
@@ -46,7 +47,7 @@ There is no Bedrock package, no planner package, and no renderer package.
 
 | Class | What it does |
 | --- | --- |
-| `PreProfile` | Intake shape: nullable title and topic, plus domain, goal, interactivity, type, depth, theme, and audience. `defaults()` is the chip default, including theme `LIGHT`. |
+| `PreProfile` | Intake shape: nullable title, topic, and refinements, plus domain, goal, interactivity, type, depth, theme, and audience. `defaults()` is the chip default, including theme `LIGHT`. A payload without `refinements` still deserializes. |
 | `ProfileChoice` | Chip contract: `wireValue()` and `label()`. |
 | `Domain` | `java`, `spring-boot`, `python`, `ml`, `react`. Default `java`. |
 | `Goal` | `explain-flow`, `use-case`, `compare`, `layers`, `other`. Default `explain-flow`. |
@@ -61,6 +62,15 @@ There is no Bedrock package, no planner package, and no renderer package.
 | `ResolvedProfile` | Profile after the rules, plus disabled-chip tooltips. |
 | `ProfileCombinationCatalog` | The rule list. `catalog()` publishes it. `resolve(PreProfile)` forces a type, then collects disables. Theme has no row. |
 
+### Profile assistant
+
+| Class | What it does |
+| --- | --- |
+| `AiClient` | Chat role. `chat` returns plain text plus the profile fields the assistant may set. `greeting`, `offline`, and `systemPrompt` are part of the same role. Planner and renderer methods are not on this interface yet. |
+| `ScriptedAiClient` | Deterministic chat. A topic under 5 words, or one on a fixed phrase list, is vague and gets one clarifying question. The answer is `refinements`. Goal Other is mapped to a canonical goal and applied only after the user confirms. HTML in a user message is returned unchanged as text. No AWS calls. |
+| `AiClientConfiguration` | Registers `ScriptedAiClient` when `diagrammer.bedrock.enabled` is missing or `false`. No Bedrock bean exists. |
+| `AssistantRequest`, `AssistantReply`, `ChatTurn` | One chat turn, the plain-text reply (`topic`, `refinements`, `confirmedGoal`), and one earlier transcript line. |
+
 ### Theme tokens
 
 | Class | What it does |
@@ -69,14 +79,18 @@ There is no Bedrock package, no planner package, and no renderer package.
 
 ## Hilla endpoints
 
-Both types use `@BrowserCallable`. Methods are `@PermitAll` (any logged-in user). Neither is `@AnonymousAllowed`, so an anonymous call is rejected. There is no `@Endpoint` class.
+All four types use `@BrowserCallable`. Methods are `@PermitAll` (any logged-in user). None is `@AnonymousAllowed`, so an anonymous call is rejected. There is no `@Endpoint` class.
 
 | Endpoint | Method | What it does |
 | --- | --- | --- |
 | `CurrentUserEndpoint` | `getCurrentUser()` | Returns `CurrentUser` (`userId`, `username`, `displayName`, `roles`) for the logged-in user. |
 | `ProfileEndpoint` | `catalog()` | Returns `ProfileCombinationCatalog.catalog()`. Does not validate, store, or generate. |
+| `AssistantEndpoint` | `chat(AssistantRequest)` | Delegates to `AiClient`. Returns plain text plus topic, refinements, and a confirmed goal. Does not store the transcript or generate. |
+| `AssistantEndpoint` | `offline()` | True when the active client is the scripted assistant. |
+| `AssistantEndpoint` | `greeting(Domain)` | Opening line for that domain, from the resource bundle. |
+| `MessagesEndpoint` | `ui()` | Returns `UiCopy`, the English strings from `messages.properties`. |
 
-`CurrentUser` is the record those fields travel in. It is not an endpoint.
+`CurrentUser` and `UiCopy` are records those fields travel in. They are not endpoints.
 
 ## React views and components
 
@@ -85,7 +99,7 @@ File routes from `src/main/frontend/views/`. `routes.tsx` sends anonymous users 
 | Route | File | What it does |
 | --- | --- | --- |
 | `/login` | `views/login.tsx` | Login overlay. Skips the app layout. Calls `useAuth().login`. |
-| `/` | `views/@index.tsx` | Diagram Orchestrator. Login required. Chip intake, including the Theme chip after Depth and outside Advanced, a live Pre-Profile card, a theme preview card, disabled Confirm & Generate, and a profile-assistant placeholder. |
+| `/` | `views/@index.tsx` | Diagram Orchestrator. Login required. Title field above the chips, chip intake including Theme, a live Pre-Profile card, a theme preview card, the Confirm & Generate gate, and the profile-assistant chat. |
 | layout | `views/@layout.tsx` | App shell: brand, display name, Log out, and the view outlet. |
 
 | File | What it does |
@@ -96,10 +110,13 @@ File routes from `src/main/frontend/views/`. `routes.tsx` sends anonymous users 
 | `routes.tsx` | Builds the file router and protects routes with `/login`. |
 | `profile/ChipGroup.tsx` | Single-select radio chips. A disabled chip keeps a tooltip. |
 | `profile/applyCatalog.ts` | Browser copy of `ProfileCombinationCatalog.resolve`. |
-| `META-INF/resources/styles.css` | Layout for the app shell, chips, Pre-Profile card, theme preview, and assistant panel. |
+| `profile/AssistantPanel.tsx` | Chat transcript, domain greeting, and send box. Assistant lines are React text nodes. |
+| `profile/titleText.ts` | Title length rule: 3 to 80 characters after trimming. Empty stays quiet until the field was typed in and left. |
+| `META-INF/resources/styles.css` | Layout for the app shell, chips, title field, Pre-Profile card, theme preview, and assistant panel. |
+| `src/main/resources/messages.properties` | English resource bundle for the title field, the generate gate, the chat prompts, and the offline-assistant note. |
 | `src/main/resources/META-INF/resources/diagram-theme.css` | The only copy of the light and dark diagram palettes. Custom properties on `.diagram-theme-light` and `.diagram-theme-dark`. |
 
-`PreProfileCard` and `ThemePreview` are functions inside `views/@index.tsx`, not their own files. Title and topic render as `not set yet`. `ThemePreview` shows a title, a step chip, a code line, and an accent button in the selected palette.
+`PreProfileCard` and `ThemePreview` are functions inside `views/@index.tsx`, not their own files. An empty title, topic, or refinements row renders as `not set yet`. An invalid title is not shown as set. `ThemePreview` shows a title, a step chip, a code line, and an accent button in the selected palette. Confirm & Generate stays disabled until the title is valid and the topic is set. Clicking it shows `Generation arrives in a later release` and does not call the server.
 
 ## Config and profiles
 
@@ -131,10 +148,11 @@ Environment variable names only (values are not in git):
 | `AWS_REGION` | Region for the S3 client. |
 | `AWS_ACCESS_KEY_ID` | SDK default credential chain. Not read by application code. |
 | `AWS_SECRET_ACCESS_KEY` | SDK default credential chain. Not read by application code. |
+| `DIAGRAMMER_BEDROCK_ENABLED` | Optional. When unset or `false`, the scripted `AiClient` is the chat bean. There is no Bedrock client to turn on. |
 
 ## Tests
 
-Backend tests are JUnit under `src/test/java/`. There is no frontend test runner and no `*.test.ts` / `*.spec.tsx`. The browser smoke test is Playwright started from Java.
+Backend tests are JUnit under `src/test/java/`. There is no frontend test runner and no `*.test.ts` / `*.spec.tsx`. Browser smoke tests are Playwright started from Java.
 
 | Test | What it covers |
 | --- | --- |
@@ -142,8 +160,11 @@ Backend tests are JUnit under `src/test/java/`. There is no frontend test runner
 | `HealthEndpointTest` | `GET /actuator/health` is public and hides details. Other actuator paths are not exposed. `/` still requires login. |
 | `SignedInBrowser` | Test helper in `src/test/java/dev/diagrammer/SignedInBrowser.java`. Posts the fixture login and copies the session cookie into a Playwright context, so a feature test opens already signed in. |
 | `OrchestratorSmokeTest` | S2 and S15 browser smoke. Starts already signed in through `SignedInBrowser`, then checks default chips including Theme Light, the Pre-Profile card, chip updates, Dark updating the card and the preview, v1 types only, pyramid versus multi-scenario, and compare staying on auto. Anonymous `catalog()` is rejected. The app shell stays light. |
+| `TitleAndAssistantSmokeTest` | S3 and S4 browser smoke. Starts already signed in. Empty title, length errors, live card, domain greetings, topic gate, one vague-topic question, Goal Other confirmation, escaped assistant HTML, and an anonymous chat call rejected. Confirm & Generate makes no request. |
+| `ScriptedAiClientTest` | Vague rule, one clarifying question, goal mapping, profile summary, system prompt, and HTML returned as text. No AWS client. |
+| `AiClientDefaultBeanTest` | The Spring context starts. With Bedrock unset, the only `AiClient` bean is `ScriptedAiClient` and `offline()` is true. |
 | `ProfileCombinationCatalogTest` | Defaults, chip order and wire values, no comparison type, unique rule ids, static and step-by-step with every type, pyramid/multi-scenario, compare forces auto, other goals do not, and theme stays for every type and interactivity. |
-| `PreProfileTest` | `PreProfile` serializes `theme` as `LIGHT` or `DARK`. |
+| `PreProfileTest` | `PreProfile` serializes `theme` as `LIGHT` or `DARK`. `refinements` round-trips, and JSON that omits it still deserializes. |
 | `DiagramThemeTokensTest` | Light and dark define the same custom-property keys, and the colors match `diagram-theme.css`. |
 | `S3UserStoreTest` | Reads `auth/users.json`. Rejects a non-array file, a password without `{noop}`, and a user missing `displayName`. |
 | `UserStoragePrefixTest` | `users/{userId}/`, the logged-in user, and a user id that could escape the folder. |
@@ -153,13 +174,12 @@ Backend tests are JUnit under `src/test/java/`. There is no frontend test runner
 
 Decided in [ARCHITECTURE.md](ARCHITECTURE.md), and absent from this tree:
 
-- Backend Pre-Profile validation is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card.
-- The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card.
-- Profile-assistant chat. The orchestrator shows the text "Profile assistant coming soon".
-- Confirm & Generate. The button is disabled.
+- Backend Pre-Profile validation, including a server-side 3–80 character title check, is planned (S5). v0.0.4 checks the title in the browser only.
+- The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned (S5). The profile summary shows the chosen type, for example `Auto`, with no "likely" layout.
+- Confirm & Generate does not generate. The enabled button shows `Generation arrives in a later release` and stores nothing (S7, S11).
 - Planner, DiagramSpec, template renderer, and opt-in LLM HTML.
-- Bedrock client and `AiClient` (chat, JSON planner, diagrammer/renderer).
-- Storing diagram HTML, Pre-Profile JSON, or DiagramSpec JSON in S3. S3 is used for `auth/users.json` only. `UserStoragePrefix` builds `users/{userId}/` and nothing under it is written.
+- The Bedrock/Grok `AiClient`. v0.0.4 ships the interface and `ScriptedAiClient` only (S6).
+- Storing diagram HTML, Pre-Profile JSON, or DiagramSpec JSON in S3. The chat transcript and `refinements` stay in the browser. S3 is used for `auth/users.json` only. `UserStoragePrefix` builds `users/{userId}/` and nothing under it is written.
 - Public diagram pages. `/diagrams/**` is a 404 placeholder.
 - Content-Security-Policy, HTML sanitizing, and a sandboxed iframe preview.
 - Generated pages that apply the selected palette. The Theme chip and `ThemePreview` are in `views/@index.tsx`. The shell document stays `theme="light"` ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).

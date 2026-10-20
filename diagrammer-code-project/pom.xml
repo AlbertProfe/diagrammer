@@ -13,7 +13,7 @@
 
     <groupId>dev.diagrammer</groupId>
     <artifactId>diagrammer</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <name>Diagrammer</name>
     <description>Vaadin Hilla app for creating and storing diagrams.</description>
 

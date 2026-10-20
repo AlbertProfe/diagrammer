@@ -219,6 +219,7 @@ class ProfileCombinationCatalogTest {
                 defaults.depth(),
                 theme,
                 defaults.audience(),
-                defaults.topic());
+                defaults.topic(),
+                defaults.refinements());
     }
 }
