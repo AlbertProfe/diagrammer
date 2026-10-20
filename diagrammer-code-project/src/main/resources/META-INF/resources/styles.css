@@ -78,6 +78,60 @@ body,
   font-weight: 600;
 }
 
+.diagram-title,
+.assistant-input {
+  width: 100%;
+}
+
+.title-error {
+  margin: -0.35rem 0 0;
+  color: var(--lumo-error-text-color, #b00020);
+  font-size: 0.85rem;
+}
+
+.assistant-offline {
+  margin: 0 0 0.75rem;
+  color: var(--lumo-secondary-text-color, #555);
+  font-size: 0.85rem;
+}
+
+.assistant-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  max-height: 28rem;
+  overflow: auto;
+}
+
+.assistant-message {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.assistant-message[data-role='assistant'] {
+  background: var(--lumo-base-color, #fff);
+}
+
+.assistant-message[data-role='user'] {
+  background: var(--lumo-primary-color-10pct, #e7f1fe);
+}
+
+.assistant-compose {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.generate-note {
+  margin: 0;
+  color: var(--lumo-secondary-text-color, #555);
+}
+
 .orchestrator p,
 .generate-hint {
   margin: 0;

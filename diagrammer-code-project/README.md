@@ -2,7 +2,7 @@
 
 This folder is the Maven/Hilla project root. Run every command below from here, not from the repository root.
 
-Release v0.0.1 is story S1: log in, see your display name, and log out. Release v0.0.2 is story S2: the Diagram Orchestrator intake, with profile chips and a live Pre-Profile card. Release v0.0.3 is story S15: a Light/Dark theme chip, stored on the Pre-Profile, with a preview of the diagram palette. The public `/diagrams/**` route is still a placeholder. Confirm & Generate stays disabled until a later story. The app shell stays light.
+Release v0.0.1 is story S1: log in, see your display name, and log out. Release v0.0.2 is story S2: the Diagram Orchestrator intake, with profile chips and a live Pre-Profile card. Release v0.0.3 is story S15: a Light/Dark theme chip, stored on the Pre-Profile, with a preview of the diagram palette. Release v0.0.4 is stories S3 and S4: a Title field, the Confirm & Generate gate, and a profile-assistant chat. The chat is a scripted assistant. It is the default when `diagrammer.bedrock.enabled` is unset, and it does not call AWS. Confirm & Generate does not generate a diagram yet. The public `/diagrams/**` route is still a placeholder. The app shell stays light.
 
 ## What works without AWS
 
@@ -45,7 +45,7 @@ The app redirects to the login view. Sign in with the fixture user:
 | Password | `diagrammer` |
 | Display name | Albert |
 
-That password is a local fixture, not a production secret. After login the header shows **Albert** and **Log out**. The Diagram Orchestrator shows the profile chips (Domain, Goal, Interactivity, Type, Depth, Theme, and Audience under Advanced), a live Pre-Profile card, a small theme preview in that card, a disabled Confirm & Generate button, and a profile-assistant placeholder. Theme defaults to Light. Dark changes the preview only.
+That password is a local fixture, not a production secret. After login the header shows **Albert** and **Log out**. The Diagram Orchestrator shows a Title field, the profile chips (Domain, Goal, Interactivity, Type, Depth, Theme, and Audience under Advanced), a live Pre-Profile card, a small theme preview in that card, Confirm & Generate, and the profile assistant. The assistant says it is offline and replies from a script. Theme defaults to Light. Dark changes the preview only. Confirm & Generate stays disabled until the title is 3–80 characters and the topic is set. Clicking it then shows that generation arrives in a later release.
 
 `./mvnw -Pdev` is the same one-liner. `spring-boot:run` is the default Maven goal, and `-Pdev` is what turns the fixture on. Without `-Pdev`, that default goal fails closed.
 
@@ -69,6 +69,9 @@ Tests use the `test` profile and the classpath fixture. They do not need `DIAGRA
 - changing a chip updates the card, Type offers only the v1 layouts, and Pyramid cannot be combined with Multi-scenario
 - picking Dark updates the Pre-Profile card and the theme preview; the app shell stays light
 - the Pre-Profile serializes `theme`, and the light and dark palettes define the same CSS custom properties
+- the title field gates Confirm & Generate together with the topic, and the click does not generate
+- the profile assistant greets, asks once when a topic is vague, maps Goal Other after confirmation, and shows model-shaped HTML as text
+- with no Bedrock setting, the only chat client is the scripted assistant
 
 ## S3 user store
 

@@ -1,8 +1,10 @@
 import { Button } from '@vaadin/react-components/Button.js';
 import { Details } from '@vaadin/react-components/Details.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
 import { useSignal } from '@vaadin/hilla-react-signals';
 import type { ViewConfig } from '@vaadin/hilla-file-router/types.js';
-import { ProfileEndpoint } from 'Frontend/generated/endpoints';
+import { AssistantEndpoint, MessagesEndpoint, ProfileEndpoint } from 'Frontend/generated/endpoints';
+import type AssistantReply from 'Frontend/generated/dev/diagrammer/assistant/AssistantReply';
 import type AudienceOption from 'Frontend/generated/dev/diagrammer/profile/AudienceOption';
 import type DepthOption from 'Frontend/generated/dev/diagrammer/profile/DepthOption';
 import type DiagramTypeOption from 'Frontend/generated/dev/diagrammer/profile/DiagramTypeOption';
@@ -12,9 +14,12 @@ import type InteractivityOption from 'Frontend/generated/dev/diagrammer/profile/
 import type PreProfile from 'Frontend/generated/dev/diagrammer/profile/PreProfile';
 import type ThemeOption from 'Frontend/generated/dev/diagrammer/profile/ThemeOption';
 import type ProfileCatalog from 'Frontend/generated/dev/diagrammer/profile/ProfileCatalog';
+import type UiCopy from 'Frontend/generated/dev/diagrammer/endpoint/UiCopy';
 import { useEffect } from 'react';
+import { AssistantPanel } from 'Frontend/profile/AssistantPanel';
 import { applyCatalog } from 'Frontend/profile/applyCatalog';
 import { ChipGroup, type ChipOption } from 'Frontend/profile/ChipGroup';
+import { acceptedTitle, titleError } from 'Frontend/profile/titleText';
 
 export const config: ViewConfig = {
   loginRequired: true,
@@ -22,46 +27,55 @@ export const config: ViewConfig = {
   menu: { title: 'Diagram Orchestrator' },
 };
 
-const NOT_SET = 'not set yet';
-
 type Choice = {
   id?: string | null;
   label?: string | null;
   value?: string | null;
 };
 
+const FALLBACK_ERROR = 'Profile options could not be loaded.';
+
 export default function DiagramOrchestratorView() {
   const catalog = useSignal<ProfileCatalog | undefined>(undefined);
+  const copy = useSignal<UiCopy | undefined>(undefined);
   const profile = useSignal<PreProfile | undefined>(undefined);
+  const offline = useSignal(false);
   const loadError = useSignal('');
+  const titleValue = useSignal('');
+  const titleTyped = useSignal(false);
+  const titleBlurred = useSignal(false);
+  const generateNote = useSignal('');
 
   useEffect(() => {
     let active = true;
-    ProfileEndpoint.catalog()
-      .then((loaded) => {
+    Promise.all([ProfileEndpoint.catalog(), MessagesEndpoint.ui(), AssistantEndpoint.offline()])
+      .then(([loaded, ui, isOffline]) => {
         if (!active) {
           return;
         }
-        if (!loaded?.defaults) {
-          loadError.value = 'Profile options could not be loaded.';
+        if (!loaded?.defaults || !ui) {
+          loadError.value = FALLBACK_ERROR;
           return;
         }
         catalog.value = loaded;
+        copy.value = ui;
+        offline.value = Boolean(isOffline);
         profile.value = applyCatalog(loaded.defaults, loaded.rules).profile;
       })
       .catch(() => {
         if (active) {
-          loadError.value = 'Profile options could not be loaded.';
+          loadError.value = FALLBACK_ERROR;
         }
       });
     return () => {
       active = false;
     };
-  }, [catalog, loadError, profile]);
+  }, [catalog, copy, loadError, offline, profile]);
 
   const loaded = catalog.value;
+  const ui = copy.value;
   const current = profile.value;
-  if (!loaded || !current) {
+  if (!loaded || !current || !ui) {
     return (
       <main className="orchestrator">
         <h1>Diagram Orchestrator</h1>
@@ -71,6 +85,11 @@ export default function DiagramOrchestratorView() {
   }
 
   const applied = applyCatalog(current, loaded.rules);
+  const title = acceptedTitle(titleValue.value);
+  const shown: PreProfile = { ...applied.profile, title };
+  const error = titleError(titleValue.value, titleTyped.value, titleBlurred.value, ui.titleError, ui.titleEmpty);
+  const topicSet = Boolean(shown.topic && shown.topic.trim());
+  const canGenerate = Boolean(title) && topicSet;
 
   function select(
     group: 'domain' | 'goal' | 'interactivity' | 'type' | 'depth' | 'theme' | 'audience',
@@ -129,11 +148,52 @@ export default function DiagramOrchestratorView() {
     profile.value = applyCatalog(next, loaded!.rules).profile;
   }
 
+  function onReply(reply: AssistantReply) {
+    const latest = profile.value;
+    if (!latest) {
+      return;
+    }
+    const next: PreProfile = { ...latest };
+    if (reply.topic) {
+      next.topic = reply.topic;
+    }
+    if (reply.refinements) {
+      next.refinements = reply.refinements;
+    }
+    if (reply.confirmedGoal) {
+      next.goal = reply.confirmedGoal;
+    }
+    profile.value = applyCatalog(next, loaded!.rules).profile;
+  }
+
   return (
     <main className="orchestrator">
       <h1>Diagram Orchestrator</h1>
       <div className="orchestrator-columns">
         <section className="intake-panel" aria-label="Profile options">
+          <TextField
+            className="diagram-title"
+            label={ui.titleLabel}
+            placeholder={ui.titlePlaceholder}
+            value={titleValue.value}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'title-error' : undefined}
+            onValueChanged={(event) => {
+              const next = event.detail.value;
+              titleValue.value = next;
+              if (next.length > 0) {
+                titleTyped.value = true;
+              }
+            }}
+            onBlur={() => {
+              titleBlurred.value = true;
+            }}
+          />
+          {error ? (
+            <p id="title-error" className="title-error" role="alert">
+              {error}
+            </p>
+          ) : null}
           <ChipGroup
             group="domain"
             label="Domain"
@@ -193,21 +253,44 @@ export default function DiagramOrchestratorView() {
             depths={loaded.depths}
             themes={loaded.themes}
             audiences={loaded.audiences}
-            profile={applied.profile}
+            profile={shown}
+            notSet={ui.notSet}
+            refinementsLabel={ui.refinementsLabel}
+            titleLabel={ui.titleLabel}
           />
           <div className="generate">
-            <Button disabled aria-describedby="generate-hint">
-              Confirm & Generate
+            <Button
+              id="confirm-generate"
+              disabled={!canGenerate}
+              aria-describedby={canGenerate ? undefined : 'generate-hint'}
+              onClick={() => {
+                if (!canGenerate) {
+                  return;
+                }
+                generateNote.value = ui.generateLater;
+              }}
+            >
+              {ui.generateButton}
             </Button>
-            <p id="generate-hint" className="generate-hint">
-              Title and Topic are needed.
-            </p>
+            {!canGenerate && (
+              <p id="generate-hint" className="generate-hint">
+                {ui.generateHint}
+              </p>
+            )}
+            {generateNote.value && (
+              <p id="generate-note" className="generate-note" role="status">
+                {generateNote.value}
+              </p>
+            )}
           </div>
         </section>
-        <aside className="assistant-panel" aria-label="Profile assistant">
-          <h2>Profile assistant</h2>
-          <p>Profile assistant coming soon</p>
-        </aside>
+        <AssistantPanel
+          copy={ui}
+          offline={offline.value}
+          domain={shown.domain}
+          profile={shown}
+          onReply={onReply}
+        />
       </div>
     </main>
   );
@@ -222,6 +305,9 @@ function PreProfileCard({
   themes,
   audiences,
   profile,
+  notSet,
+  refinementsLabel,
+  titleLabel,
 }: {
   domains: DomainOption[] | undefined;
   goals: GoalOption[] | undefined;
@@ -231,12 +317,15 @@ function PreProfileCard({
   themes: ThemeOption[] | undefined;
   audiences: AudienceOption[] | undefined;
   profile: PreProfile;
+  notSet: string;
+  refinementsLabel: string;
+  titleLabel: string;
 }) {
   return (
     <section className="pre-profile" aria-label="Pre-Profile">
       <h2>Pre-Profile</h2>
       <dl>
-        <Row field="title" label="Title" text={NOT_SET} />
+        <Row field="title" label={titleLabel} text={shownText(profile.title, notSet)} />
         <Row field="domain" label="Domain" text={labelOf(domains, profile.domain)} wire={wireOf(domains, profile.domain)} />
         <Row field="goal" label="Goal" text={labelOf(goals, profile.goal)} wire={wireOf(goals, profile.goal)} />
         <Row
@@ -254,11 +343,17 @@ function PreProfileCard({
           text={labelOf(audiences, profile.audience)}
           wire={wireOf(audiences, profile.audience)}
         />
-        <Row field="topic" label="Topic" text={NOT_SET} />
+        <Row field="topic" label="Topic" text={shownText(profile.topic, notSet)} />
+        <Row field="refinements" label={refinementsLabel} text={shownText(profile.refinements, notSet)} />
       </dl>
       <ThemePreview wire={wireOf(themes, profile.theme)} />
     </section>
   );
+}
+
+function shownText(value: string | null | undefined, notSet: string): string {
+  const trimmed = value?.trim() ?? '';
+  return trimmed.length === 0 ? notSet : trimmed;
 }
 
 function ThemePreview({ wire }: { wire: string }) {
@@ -277,7 +372,7 @@ function ThemePreview({ wire }: { wire: string }) {
 }
 
 function Row({ field, label, text, wire }: { field: string; label: string; text: string; wire?: string }) {
-  const unset = text === NOT_SET;
+  const unset = text === 'not set yet';
   return (
     <div className="pre-profile-row" data-field={field}>
       <dt>{label}</dt>

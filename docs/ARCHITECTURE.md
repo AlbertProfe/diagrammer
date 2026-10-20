@@ -23,7 +23,7 @@ The user types the diagram title. Diagram output is English only. The app is i18
 
 Guided intake → Pre-Profile JSON → Planner → DiagramSpec JSON → Renderer → HTML.
 
-1. **Guided intake.** Vaadin chips plus a narrow profile-assistant chat. The chat only completes the profile. It does not design the diagram, write the spec, or write HTML. It asks for the topic, asks at most one clarifying question when the topic is vague, and echoes a profile summary.
+1. **Guided intake.** Vaadin chips plus a narrow profile-assistant chat. The chat only completes the profile. It does not design the diagram, write the spec, or write HTML. It asks for the topic, asks at most one clarifying question when the topic is vague, and echoes a profile summary. v0.0.4 runs that chat through a scripted `AiClient` (no model call) and adds the title field. Confirm & Generate enables when the title is 3–80 characters and the topic is set, then shows a note that generation comes later. It does not call the planner.
 2. **Pre-Profile JSON.** The backend validates it, fills defaults, and, when the diagram type is Auto, suggests a layout. Backend Pre-Profile validation is planned, not yet implemented (no story assigned yet). The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned, not yet implemented (no story assigned yet). Neither is part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card. The planner is not called without a topic.
 3. **Planner.** The JSON planner produces a DiagramSpec: structured text and code only, no raw HTML.
 4. **Renderer.** Deterministic templates are filled from the DiagramSpec by default. The user can opt to have an LLM render instead. That opt-in uses the diagrammer/renderer model role.
@@ -65,7 +65,7 @@ Topic placeholders the chat can show:
 - Java: "How adopt-dog travels from CLI to Repository"
 - ML: "What happens in a train/test split"
 - React: "Lifecycle of a component with useEffect"
-- Spring Boot and Python: TBD
+- Spring Boot and Python: still TBD. Until they are set, the chat shows "Describe your topic in one sentence".
 
 ### DiagramSpec
 
@@ -129,9 +129,9 @@ There is no default profile.
 
 - Model calls use Grok models through AWS Bedrock. This extends the earlier Bedrock decision. It does not add a separate Grok API key.
 - Three roles sit behind an `AiClient` interface:
-  - **Chat:** the profile assistant.
-  - **JSON planner:** produces the DiagramSpec.
-  - **Diagrammer/renderer:** used only when the user opts in to LLM rendering. The default path fills templates and does not call a model.
+  - **Chat:** the profile assistant. v0.0.4 implements this role with `ScriptedAiClient`. It is the default bean when `diagrammer.bedrock.enabled` is unset or false. The Bedrock client is not wired, and this role makes no AWS call. The chat panel shows an offline-assistant note while that client is active.
+  - **JSON planner:** produces the DiagramSpec. Not implemented.
+  - **Diagrammer/renderer:** used only when the user opts in to LLM rendering. The default path fills templates and does not call a model. Not implemented.
 - AWS access uses the scoped IAM user `diagrammer-app`. It can read, write, list, and delete objects in `diagrammer-albertprofe-docs` only. The region is `eu-central-1`.
 - Bedrock permissions are added once a model is chosen.
 - That user's keys are secrets. See [Secrets](#secrets).
