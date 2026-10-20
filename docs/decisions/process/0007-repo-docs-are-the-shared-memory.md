@@ -18,3 +18,7 @@ Do not use a knowledge-graph tool (such as Graphify) for now. The shared source 
 ## Rationale
 
 Keep the shared picture in the repository. Bots read these two files before working, instead of a separate knowledge-graph tool.
+
+## Notes
+
+Note (2026-10-20): refined by [0034](0034-code-memory-for-agents.md).

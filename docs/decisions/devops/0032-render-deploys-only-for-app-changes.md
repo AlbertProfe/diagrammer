@@ -22,3 +22,5 @@ Avoid redeploys for docs-only and out-of-app changes.
 ## Notes
 
 Relates to [0030](0030-deploy-on-render.md) and [0031](0031-render-service-shape.md).
+
+Note (2026-10-20): the build filter did not mean pushes to `main` auto-deployed before 2026-10-19 20:00 Europe/Madrid. See [0037](0037-render-deploys-via-the-github-app.md).

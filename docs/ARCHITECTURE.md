@@ -4,7 +4,7 @@ Intended architecture for Diagrammer. It records only decisions already made in 
 
 This file is the current picture. When a later decision changes the design, update this file to match. The decision log stays append-only.
 
-There is no knowledge-graph tool. This file and the [decision log](DECISIONS.md) are the shared source of truth. Every bot (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads both before working.
+There is no knowledge-graph tool. This file and the [decision log](DECISIONS.md) are the shared source of truth. Code memory for agents is [AGENTS.md](../AGENTS.md) and [CODEMAP.md](CODEMAP.md), kept by diag-documenter ([0034](decisions/process/0034-code-memory-for-agents.md)). Every bot (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads them before working. A pull request that changes code structure (packages, endpoints, views, config, tests) updates CODEMAP.md in the same PR, or in a follow-up docs PR.
 
 ## Product
 
@@ -17,7 +17,7 @@ One screen, the Diagram Orchestrator, has two modes:
 
 Every generate creates a new immutable version (`v1` through `vN`). A regenerate does not overwrite an earlier version. Whether a whole diagram can be deleted is TBD.
 
-The user types the diagram title. Diagram output is English only. The app is i18n-ready. Themes are light and dark.
+The user types the diagram title. Diagram output is English only. The app is i18n-ready. Light and dark themes apply only to generated diagrams and their preview. The app shell stays light ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
 
 ## Pipeline
 
@@ -145,8 +145,10 @@ There is no default profile.
 - The host is Render ([0030](decisions/devops/0030-deploy-on-render.md)). The Render account is albertprofe. The service name is `diagrammer`.
 - The public URL is https://diagrammer-wt9s.onrender.com.
 - The service is on the free plan in Frankfurt (`plan: free`, `region: frankfurt` in [`render.yaml`](../render.yaml)), using Render's Docker runtime.
-- Render deploys from GitHub: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`. Auto-deploy is on for commits to `main` (`autoDeploy: true`, `autoDeployTrigger: commit`).
-- Auto-deploy follows `buildFilter` in [`render.yaml`](../render.yaml). A change deploys when it matches `diagrammer-code-project/**`. A change that only matches `diagrammer-code-project/**/*.md` does not. Both `paths` and `ignoredPaths` are set, because a Blueprint sync replaces the whole filter. Albert set the same included path and ignored path in the Render dashboard ([0032](decisions/devops/0032-render-deploys-only-for-app-changes.md)).
+- Render's Source is the GitHub repo [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), branch `main`, connected through the Render GitHub app ([0037](decisions/devops/0037-render-deploys-via-the-github-app.md)). Before 2026-10-19 20:00 Europe/Madrid the service was linked by public repo URL, so it never received push events. Every deploy before then was manual or triggered by a settings change.
+- PRs #30 and #31 went live through a manual deploy of `main` (commit `b7500e8`), started at 19:51 and live at 19:56 Madrid time on 2026-10-19.
+- Around 20:00 that day Albert reconnected the Source through the Render GitHub app and re-added the build filter, because reconnecting had wiped it. Paths are `diagrammer-code-project/**`. Ignored paths are `diagrammer-code-project/**/*.md`. [`render.yaml`](../render.yaml) has the same `buildFilter`. Both `paths` and `ignoredPaths` are set, because a Blueprint sync replaces the whole filter ([0032](decisions/devops/0032-render-deploys-only-for-app-changes.md)).
+- Push-triggered auto-deploy is expected (`autoDeploy: true`, `autoDeployTrigger: commit` in [`render.yaml`](../render.yaml)). It is not proven yet. The next code merge (v0.0.3) is the first test. Manual deploys are the fallback.
 - Those globs are relative to the repository root. `rootDir` is unset. The Docker build inputs stay included: `Dockerfile`, `pom.xml`, `mvnw`, `package.json`, `package-lock.json`, and `src/` (the frontend lives under `src/main/frontend/`).
 - The image is [`diagrammer-code-project/Dockerfile`](../diagrammer-code-project/Dockerfile). [`render.yaml`](../render.yaml) sets `dockerfilePath` to `./diagrammer-code-project/Dockerfile` and `dockerContext` to `./diagrammer-code-project`.
 - The service runs with `SPRING_PROFILES_ACTIVE=s3`. The Dockerfile sets that default, and [`render.yaml`](../render.yaml) sets the same value. The decision 26 variables are listed in `render.yaml` with `sync: false`, so the values are set in Render and are never committed.
@@ -172,7 +174,7 @@ There is no default profile.
 
 - The git host is GitHub. The repository is public: [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer). It is not on Cursor Origin.
 - The default branch is `main`. Nothing goes straight to `main`.
-- GitHub is the single source of truth. A push to `main` is what Render builds and publishes. See [Deploy pipeline](#deploy-pipeline).
+- GitHub is the single source of truth. Render is connected through the GitHub app. A push to `main` that matches the build filter is the expected deploy, and that auto-deploy is unproven until v0.0.3. Manual deploys are the fallback. See [Deploy pipeline](#deploy-pipeline).
 - Cloud agents clone from GitHub, work on a branch, and open pull requests on GitHub.
 - diag-reviewer comments on those pull requests. Albert reviews and merges on GitHub.
 
