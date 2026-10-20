@@ -1,0 +1,37 @@
+/*
+ * Diagram palettes. This file is the only copy of these colors.
+ *
+ * The Orchestrator preview sets .diagram-theme-light or .diagram-theme-dark
+ * on the sample card. The renderer (S8) inlines this stylesheet into each
+ * generated HTML page and sets the same class. DiagramThemeTokens reads it
+ * from the classpath; do not duplicate the values in Java or TypeScript.
+ *
+ * Both blocks define the same custom properties. Light accents are the blue
+ * and violet from the light reference pages. Dark accents, and the dark
+ * surface colors, follow the dark reference page. --heading on dark is
+ * slate-50, because that page has no heading token of its own.
+ */
+
+.diagram-theme-light {
+  --bg: #f1f5f9;
+  --text: #334155;
+  --heading: #1e293b;
+  --muted: #64748b;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  color-scheme: light;
+}
+
+.diagram-theme-dark {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --heading: #f8fafc;
+  --muted: #94a3b8;
+  --card: #1e293b;
+  --border: #475569;
+  --accent: #38bdf8;
+  --accent2: #a78bfa;
+  color-scheme: dark;
+}

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @StyleSheet(Lumo.STYLESHEET)
 @StyleSheet("styles.css")
+@StyleSheet("diagram-theme.css")
 public class DiagrammerApplication implements AppShellConfigurator {
 
     public static void main(String[] args) {

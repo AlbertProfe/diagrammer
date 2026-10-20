@@ -7,7 +7,7 @@ The decision files under `docs/decisions/` and [ARCHITECTURE.md](ARCHITECTURE.md
 | Domain | Active decisions | Superseded | Open questions | Last updated |
 | --- | --- | --- | --- | --- |
 | [architecture](#architecture) | [0001](decisions/architecture/0001-hilla-full-stack.md) | — | 0 | 2026-10-18 |
-| [front](#front) | [0015](decisions/front/0015-light-and-dark-themes.md) | — | Arrow and SVG geometry | 2026-10-18 |
+| [front](#front) | [0015](decisions/front/0015-light-and-dark-themes.md) | — | Arrow and SVG geometry | 2026-10-20 |
 | [back](#back) | [0010](decisions/back/0010-grok-models-on-bedrock.md) | — | 0 | 2026-10-18 |
 | [aws](#aws) | [0005](decisions/aws/0005-s3-for-user-generated-documents.md), [0006](decisions/aws/0006-bedrock-for-model-calls.md), [0012](decisions/aws/0012-one-s3-bucket-folders-per-user-and-diagram.md), [0023](decisions/aws/0023-aws-region-eu-central-1.md), [0024](decisions/aws/0024-private-bucket-and-key-layout.md), [0025](decisions/aws/0025-iam-user-diagrammer-app.md), [0026](decisions/aws/0026-configuration-by-environment-variables.md) | — | Exact diagram URL form; limits and cost; exact Bedrock model id; Bedrock permissions | 2026-10-18 |
 | [devops](#devops) | [0027](decisions/devops/0027-java-21-maven-3-9-node-24.md), [0029](decisions/devops/0029-framework-and-library-versions.md), [0030](decisions/devops/0030-deploy-on-render.md), [0031](decisions/devops/0031-render-service-shape.md), [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md) | [0002](decisions/devops/0002-deploy-on-railway.md) | 0 | 2026-10-18 |
@@ -25,13 +25,13 @@ Last updated: 2026-10-18
 
 ### front
 
-Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)).
+Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)). v0.0.3 stores that choice on the Pre-Profile (`light` default, `dark`) and defines both palettes as one shared stylesheet. The app shell stays light.
 
 Open questions:
 
 - Arrow and SVG geometry. Computed from the layout, or hand-placed like the reference. Not chosen ([ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 ### back
 
