@@ -10,6 +10,7 @@ import type DomainOption from 'Frontend/generated/dev/diagrammer/profile/DomainO
 import type GoalOption from 'Frontend/generated/dev/diagrammer/profile/GoalOption';
 import type InteractivityOption from 'Frontend/generated/dev/diagrammer/profile/InteractivityOption';
 import type PreProfile from 'Frontend/generated/dev/diagrammer/profile/PreProfile';
+import type ThemeOption from 'Frontend/generated/dev/diagrammer/profile/ThemeOption';
 import type ProfileCatalog from 'Frontend/generated/dev/diagrammer/profile/ProfileCatalog';
 import { useEffect } from 'react';
 import { applyCatalog } from 'Frontend/profile/applyCatalog';
@@ -71,7 +72,10 @@ export default function DiagramOrchestratorView() {
 
   const applied = applyCatalog(current, loaded.rules);
 
-  function select(group: 'domain' | 'goal' | 'interactivity' | 'type' | 'depth' | 'audience', wire: string) {
+  function select(
+    group: 'domain' | 'goal' | 'interactivity' | 'type' | 'depth' | 'theme' | 'audience',
+    wire: string,
+  ) {
     // Read the signal, not the render snapshot. Forcing Type (Compare concepts
     // stays on Auto) emits a second value-changed while this render is stale.
     const latest = profile.value;
@@ -109,6 +113,12 @@ export default function DiagramOrchestratorView() {
         return;
       }
       next.depth = option.id;
+    } else if (group === 'theme') {
+      const option = find(loaded!.themes, wire);
+      if (!option?.id) {
+        return;
+      }
+      next.theme = option.id;
     } else {
       const option = find(loaded!.audiences, wire);
       if (!option?.id) {
@@ -159,6 +169,13 @@ export default function DiagramOrchestratorView() {
             options={chips(loaded.depths)}
             onChange={(value) => select('depth', value)}
           />
+          <ChipGroup
+            group="theme"
+            label="Theme"
+            value={wireOf(loaded.themes, current.theme)}
+            options={chips(loaded.themes)}
+            onChange={(value) => select('theme', value)}
+          />
           <Details className="advanced" summary="Advanced" opened={true}>
             <ChipGroup
               group="audience"
@@ -174,6 +191,7 @@ export default function DiagramOrchestratorView() {
             interactivity={loaded.interactivity}
             types={loaded.types}
             depths={loaded.depths}
+            themes={loaded.themes}
             audiences={loaded.audiences}
             profile={applied.profile}
           />
@@ -201,6 +219,7 @@ function PreProfileCard({
   interactivity,
   types,
   depths,
+  themes,
   audiences,
   profile,
 }: {
@@ -209,6 +228,7 @@ function PreProfileCard({
   interactivity: InteractivityOption[] | undefined;
   types: DiagramTypeOption[] | undefined;
   depths: DepthOption[] | undefined;
+  themes: ThemeOption[] | undefined;
   audiences: AudienceOption[] | undefined;
   profile: PreProfile;
 }) {
@@ -227,6 +247,7 @@ function PreProfileCard({
         />
         <Row field="type" label="Type" text={labelOf(types, profile.type)} wire={wireOf(types, profile.type)} />
         <Row field="depth" label="Depth" text={labelOf(depths, profile.depth)} wire={wireOf(depths, profile.depth)} />
+        <Row field="theme" label="Theme" text={labelOf(themes, profile.theme)} wire={wireOf(themes, profile.theme)} />
         <Row
           field="audience"
           label="Audience"
@@ -235,6 +256,22 @@ function PreProfileCard({
         />
         <Row field="topic" label="Topic" text={NOT_SET} />
       </dl>
+      <ThemePreview wire={wireOf(themes, profile.theme)} />
+    </section>
+  );
+}
+
+function ThemePreview({ wire }: { wire: string }) {
+  const theme = wire === 'dark' ? 'dark' : 'light';
+  return (
+    <section className={`theme-preview diagram-theme-${theme}`} data-theme={theme} aria-label="Theme preview">
+      <p className="theme-preview-kicker">Theme preview</p>
+      <div className="theme-preview-card">
+        <h3 className="theme-preview-title">Adopt a dog</h3>
+        <span className="theme-preview-step">Step 1</span>
+        <code className="theme-preview-code">repository.save(dog)</code>
+        <span className="theme-preview-action">Next</span>
+      </div>
     </section>
   );
 }

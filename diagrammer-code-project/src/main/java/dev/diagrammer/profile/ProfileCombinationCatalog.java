@@ -7,7 +7,9 @@ import java.util.Map;
 
 /**
  * The one combination catalog. Static and step-by-step are absent on purpose:
- * they work with every type, so they have no row. Add a row to restrict a new pair.
+ * they work with every type, so they have no row. Theme is absent for the same
+ * reason: light and dark are valid with every type and every interactivity.
+ * Add a row to restrict a new pair.
  *
  * <p>The browser applies these same rows locally. Keep that pass in step with
  * {@link #resolve(PreProfile)}: force a type from the original profile, then
@@ -71,6 +73,7 @@ public final class ProfileCombinationCatalog {
                 options(Interactivity.values(), InteractivityOption::new),
                 options(DiagramType.values(), DiagramTypeOption::new),
                 options(Depth.values(), DepthOption::new),
+                options(Theme.values(), ThemeOption::new),
                 options(Audience.values(), AudienceOption::new),
                 RULES);
     }

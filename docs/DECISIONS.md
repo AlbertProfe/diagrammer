@@ -25,7 +25,7 @@ Last updated: 2026-10-18
 
 ### front
 
-Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)). Those themes apply only to generated diagrams and their preview; the app shell stays light ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
+Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)). v0.0.3 stores that choice on the Pre-Profile (`light` default, `dark`) and defines both palettes as one shared stylesheet. Those themes apply only to generated diagrams and their preview; the app shell stays light ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
 
 Open questions:
 

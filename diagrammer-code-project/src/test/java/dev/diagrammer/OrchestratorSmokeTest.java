@@ -30,7 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Browser smoke test for the Diagram Orchestrator chips. Login itself is
- * covered by {@link LoginSmokeTest}; this signs in once and checks the intake.
+ * covered by {@link LoginSmokeTest}. This opens an already signed-in session
+ * through {@link SignedInBrowser} and checks the intake.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -54,24 +55,19 @@ class OrchestratorSmokeTest {
     private String base;
 
     @BeforeAll
-    void openBrowserAndLogIn() {
+    void openBrowserSignedIn() throws Exception {
         base = "http://127.0.0.1:" + port;
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                 .setChannel("chrome")
                 .setHeadless(true)
                 .setArgs(List.of("--no-sandbox", "--disable-dev-shm-usage")));
-        context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1440, 1200));
+        context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1440, 1400));
+        SignedInBrowser.signIn(context, base);
         page = context.newPage();
         page.setDefaultTimeout(20_000);
         page.navigate(base + "/");
-        Locator username = page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Username").setExact(true));
-        username.waitFor(new Locator.WaitForOptions().setTimeout(Duration.ofMinutes(3).toMillis()));
-        username.fill("albert");
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Password").setExact(true))
-                .fill("diagrammer");
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Log in").setExact(true)).click();
-        radio("Java").waitFor(attached(Duration.ofMinutes(1).toMillis()));
+        radio("Java").waitFor(attached(Duration.ofMinutes(3).toMillis()));
     }
 
     @AfterAll
@@ -100,6 +96,7 @@ class OrchestratorSmokeTest {
         assertChecked("Step-by-step");
         assertChecked("Auto");
         assertChecked("With code");
+        assertChecked("Light");
         assertChecked("Beginner");
 
         org.assertj.core.api.Assertions.assertThat(card("title")).isEqualTo("not set yet");
@@ -108,6 +105,7 @@ class OrchestratorSmokeTest {
         org.assertj.core.api.Assertions.assertThat(card("interactivity")).isEqualTo("Step-by-step");
         org.assertj.core.api.Assertions.assertThat(card("type")).isEqualTo("Auto");
         org.assertj.core.api.Assertions.assertThat(card("depth")).isEqualTo("With code");
+        org.assertj.core.api.Assertions.assertThat(card("theme")).isEqualTo("Light");
         org.assertj.core.api.Assertions.assertThat(card("audience")).isEqualTo("Beginner");
         org.assertj.core.api.Assertions.assertThat(card("topic")).isEqualTo("not set yet");
 
@@ -116,12 +114,38 @@ class OrchestratorSmokeTest {
         org.assertj.core.api.Assertions.assertThat(wire("interactivity")).isEqualTo("step-by-step");
         org.assertj.core.api.Assertions.assertThat(wire("type")).isEqualTo("auto");
         org.assertj.core.api.Assertions.assertThat(wire("depth")).isEqualTo("with-code");
+        org.assertj.core.api.Assertions.assertThat(wire("theme")).isEqualTo("light");
         org.assertj.core.api.Assertions.assertThat(wire("audience")).isEqualTo("beginner");
 
         assertThat(page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Confirm & Generate").setExact(true)))
                 .isDisabled();
         assertThat(page.locator("#generate-hint")).hasText("Title and Topic are needed.");
         assertThat(page.getByText("Profile assistant coming soon")).isVisible();
+        org.assertj.core.api.Assertions.assertThat(previewTheme()).isEqualTo("light");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview")).isEqualTo("rgb(241, 245, 249)");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview-action")).isEqualTo("rgb(59, 130, 246)");
+    }
+
+    @Test
+    void pickingDarkUpdatesTheCardAndThePreview() {
+        String shellBefore = cssColor(".app-shell");
+        assertChecked("Light");
+        org.assertj.core.api.Assertions.assertThat(card("theme")).isEqualTo("Light");
+
+        choose("Dark");
+
+        assertChecked("Dark");
+        org.assertj.core.api.Assertions.assertThat(card("theme")).isEqualTo("Dark");
+        org.assertj.core.api.Assertions.assertThat(wire("theme")).isEqualTo("dark");
+        org.assertj.core.api.Assertions.assertThat(previewTheme()).isEqualTo("dark");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview")).isEqualTo("rgb(15, 23, 42)");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview-card")).isEqualTo("rgb(30, 41, 59)");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".theme-preview-action")).isEqualTo("rgb(56, 189, 248)");
+        org.assertj.core.api.Assertions.assertThat(cssColor(".app-shell")).isEqualTo(shellBefore);
+
+        String catalog = catalogJson();
+        org.assertj.core.api.Assertions.assertThat(catalog).contains("\"theme\":\"LIGHT\"");
+        org.assertj.core.api.Assertions.assertThat(catalog).contains("\"value\":\"dark\"");
     }
 
     @Test
@@ -261,6 +285,31 @@ class OrchestratorSmokeTest {
 
     private String wire(String field) {
         return page.locator("[data-field='" + field + "'] dd").getAttribute("data-value");
+    }
+
+    private String previewTheme() {
+        return page.locator(".theme-preview").getAttribute("data-theme");
+    }
+
+    private String cssColor(String selector) {
+        return page.locator(selector).evaluate("el => getComputedStyle(el).backgroundColor").toString();
+    }
+
+    private String catalogJson() {
+        Object body = page.evaluate(
+                """
+                async () => {
+                  const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') ?? '';
+                  const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') ?? 'X-CSRF-TOKEN';
+                  const response = await fetch('/connect/ProfileEndpoint/catalog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', [header]: token },
+                    body: '{}'
+                  });
+                  return await response.text();
+                }
+                """);
+        return body == null ? "" : body.toString();
     }
 
     private void revealTooltip(String chipId, String tooltip) {

@@ -38,6 +38,7 @@ Chips ([0033](decisions/product/0033-pre-profile-chip-values.md)):
 - **interactivity:** `static`, `step-by-step` (default), `multi-scenario`
 - **type:** `auto` (default), `horizontal-steps`, `u-shape`, `pyramid`
 - **depth:** `overview`, `with-code` (default), `with-code-parallels`
+- **theme:** `light` (default), `dark`
 - **audience:** `beginner` (default), `intermediate`
 - **topic:** one sentence, required. This is the generate gate.
 - **refinements:** optional notes from the chat
@@ -50,6 +51,8 @@ The diagram title is separate from the topic. The user types the title.
 Goal `compare` forces type `auto` and disables `horizontal-steps`, `u-shape`, and `pyramid`.
 
 `static` and `step-by-step` are allowed with every type.
+
+Theme is allowed with every type and every interactivity. It has no combination rules. The app shell stays light. The selected palette styles the diagram preview now, and the generated page when the renderer exists. Both palettes are the custom properties in `diagrammer-code-project/src/main/resources/META-INF/resources/diagram-theme.css`.
 
 The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-layers` are superseded by `use-case`, `compare`, and `layers`.
 

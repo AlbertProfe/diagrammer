@@ -19,6 +19,7 @@ class ProfileCombinationCatalogTest {
         assertThat(defaults.interactivity()).isEqualTo(Interactivity.STEP_BY_STEP);
         assertThat(defaults.type()).isEqualTo(DiagramType.AUTO);
         assertThat(defaults.depth()).isEqualTo(Depth.WITH_CODE);
+        assertThat(defaults.theme()).isEqualTo(Theme.LIGHT);
         assertThat(defaults.audience()).isEqualTo(Audience.BEGINNER);
 
         ProfileCatalog catalog = ProfileCombinationCatalog.catalog();
@@ -65,6 +66,11 @@ class ProfileCombinationCatalogTest {
                         org.assertj.core.groups.Tuple.tuple("Overview", "overview", false),
                         org.assertj.core.groups.Tuple.tuple("With code", "with-code", true),
                         org.assertj.core.groups.Tuple.tuple("With code + framework parallels", "with-code-parallels", false));
+        assertThat(catalog.themes())
+                .extracting(ThemeOption::label, ThemeOption::value, ThemeOption::defaultSelected)
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple("Light", "light", true),
+                        org.assertj.core.groups.Tuple.tuple("Dark", "dark", false));
         assertThat(catalog.audiences())
                 .extracting(AudienceOption::label, AudienceOption::value, AudienceOption::defaultSelected)
                 .containsExactly(
@@ -170,6 +176,26 @@ class ProfileCombinationCatalogTest {
     }
 
     @Test
+    void themeStaysAsChosenForEveryTypeAndInteractivity() {
+        for (Theme theme : Theme.values()) {
+            for (Goal goal : Goal.values()) {
+                for (Interactivity interactivity : Interactivity.values()) {
+                    for (DiagramType type : DiagramType.values()) {
+                        ResolvedProfile resolved =
+                                ProfileCombinationCatalog.resolve(profile(goal, interactivity, type, theme));
+
+                        assertThat(resolved.profile().theme()).isEqualTo(theme);
+                    }
+                }
+            }
+        }
+        assertThat(ProfileCombinationCatalog.rules()).allSatisfy(rule -> {
+            assertThat(rule.tooltip()).doesNotContainIgnoringCase("theme");
+            assertThat(rule.id()).doesNotContainIgnoringCase("theme");
+        });
+    }
+
+    @Test
     void otherGoalsDoNotForceTheType() {
         ResolvedProfile resolved = ProfileCombinationCatalog.resolve(
                 profile(Goal.OTHER, Interactivity.STATIC, DiagramType.PYRAMID));
@@ -179,6 +205,10 @@ class ProfileCombinationCatalogTest {
     }
 
     private static PreProfile profile(Goal goal, Interactivity interactivity, DiagramType type) {
+        return profile(goal, interactivity, type, Theme.LIGHT);
+    }
+
+    private static PreProfile profile(Goal goal, Interactivity interactivity, DiagramType type, Theme theme) {
         PreProfile defaults = PreProfile.defaults();
         return new PreProfile(
                 defaults.title(),
@@ -187,6 +217,7 @@ class ProfileCombinationCatalogTest {
                 interactivity,
                 type,
                 defaults.depth(),
+                theme,
                 defaults.audience(),
                 defaults.topic());
     }

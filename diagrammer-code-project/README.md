@@ -2,7 +2,7 @@
 
 This folder is the Maven/Hilla project root. Run every command below from here, not from the repository root.
 
-Release v0.0.1 is story S1: log in, see your display name, and log out. Release v0.0.2 is story S2: the Diagram Orchestrator intake, with profile chips and a live Pre-Profile card. The public `/diagrams/**` route is still a placeholder. Confirm & Generate stays disabled until a later story.
+Release v0.0.1 is story S1: log in, see your display name, and log out. Release v0.0.2 is story S2: the Diagram Orchestrator intake, with profile chips and a live Pre-Profile card. Release v0.0.3 is story S15: a Light/Dark theme chip, stored on the Pre-Profile, with a preview of the diagram palette. The public `/diagrams/**` route is still a placeholder. Confirm & Generate stays disabled until a later story. The app shell stays light.
 
 ## What works without AWS
 
@@ -45,7 +45,7 @@ The app redirects to the login view. Sign in with the fixture user:
 | Password | `diagrammer` |
 | Display name | Albert |
 
-That password is a local fixture, not a production secret. After login the header shows **Albert** and **Log out**. The Diagram Orchestrator shows the profile chips (Domain, Goal, Interactivity, Type, Depth, and Audience under Advanced), a live Pre-Profile card, a disabled Confirm & Generate button, and a profile-assistant placeholder.
+That password is a local fixture, not a production secret. After login the header shows **Albert** and **Log out**. The Diagram Orchestrator shows the profile chips (Domain, Goal, Interactivity, Type, Depth, Theme, and Audience under Advanced), a live Pre-Profile card, a small theme preview in that card, a disabled Confirm & Generate button, and a profile-assistant placeholder. Theme defaults to Light. Dark changes the preview only.
 
 `./mvnw -Pdev` is the same one-liner. `spring-boot:run` is the default Maven goal, and `-Pdev` is what turns the fixture on. Without `-Pdev`, that default goal fails closed.
 
@@ -65,8 +65,10 @@ Tests use the `test` profile and the classpath fixture. They do not need `DIAGRA
 - `CurrentUserEndpoint` returns 401 when nobody is logged in
 - `GET /diagrams/example` returns 404 with the text `Diagram not found` and does not require login
 - a start with no profile and no S3 environment variables fails before the fixture store is loaded
-- the orchestrator opens on the default chips, and the Pre-Profile card matches them
+- the orchestrator opens on the default chips, and the Pre-Profile card matches them, including Theme Light
 - changing a chip updates the card, Type offers only the v1 layouts, and Pyramid cannot be combined with Multi-scenario
+- picking Dark updates the Pre-Profile card and the theme preview; the app shell stays light
+- the Pre-Profile serializes `theme`, and the light and dark palettes define the same CSS custom properties
 
 ## S3 user store
 

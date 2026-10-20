@@ -15,6 +15,7 @@ public record PreProfile(
         Interactivity interactivity,
         DiagramType type,
         Depth depth,
+        Theme theme,
         Audience audience,
         @Nullable String topic) {
 
@@ -26,11 +27,12 @@ public record PreProfile(
                 Interactivity.STEP_BY_STEP,
                 DiagramType.AUTO,
                 Depth.WITH_CODE,
+                Theme.LIGHT,
                 Audience.BEGINNER,
                 null);
     }
 
     public PreProfile withType(DiagramType type) {
-        return new PreProfile(title, domain, goal, interactivity, type, depth, audience, topic);
+        return new PreProfile(title, domain, goal, interactivity, type, depth, theme, audience, topic);
     }
 }

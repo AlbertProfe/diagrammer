@@ -13,5 +13,6 @@ public record ProfileCatalog(
         List<InteractivityOption> interactivity,
         List<DiagramTypeOption> types,
         List<DepthOption> depths,
+        List<ThemeOption> themes,
         List<AudienceOption> audiences,
         List<CombinationRule> rules) {}

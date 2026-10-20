@@ -1,6 +1,6 @@
 # Code map
 
-Last updated: 2026-10-20 (v0.0.2)
+Last updated: 2026-10-20 (v0.0.3)
 
 Skimmable map of `diagrammer-code-project/` on main. One line per item. Intended design that is not implemented is listed under [Not in the code yet](#not-in-the-code-yet).
 
@@ -12,6 +12,7 @@ Skimmable map of `diagrammer-code-project/` on main. One line per item. Intended
 | `dev.diagrammer.auth` | Login, the user store, the S3 client, and the startup profile guard. |
 | `dev.diagrammer.endpoint` | Hilla `@BrowserCallable` endpoints (`@NonNullApi`). |
 | `dev.diagrammer.profile` | Pre-Profile chip model and combination rules (`@NonNullApi`). |
+| `dev.diagrammer.theme` | The shared diagram palette. It reads `diagram-theme.css` and does not copy the colors. |
 | `dev.diagrammer.web` | Placeholder HTTP filter for public `/diagrams/**`. |
 
 There is no Bedrock package, no planner package, and no renderer package.
@@ -22,7 +23,7 @@ There is no Bedrock package, no planner package, and no renderer package.
 
 | Class | What it does |
 | --- | --- |
-| `DiagrammerApplication` | Starts Spring Boot and loads Lumo plus `styles.css`. |
+| `DiagrammerApplication` | Starts Spring Boot and loads Lumo, `styles.css`, and `diagram-theme.css`. |
 | `UserStoreProfileGuard` | Fails startup with no profile, or activates `s3` when `DIAGRAMMER_S3_BUCKET` and `AWS_REGION` are both set. Registered from `META-INF/spring.factories`. |
 | `S3ClientConfig` | On the `s3` profile, builds an `S3Client` from `AWS_REGION` and the SDK default credential chain, and exposes `S3UserStore`. |
 | `PublicDiagramFilter` | After security, answers `/diagrams` and `/diagrams/**` with 404 and the text `Diagram not found`. |
@@ -45,19 +46,26 @@ There is no Bedrock package, no planner package, and no renderer package.
 
 | Class | What it does |
 | --- | --- |
-| `PreProfile` | Intake shape: nullable title and topic, plus domain, goal, interactivity, type, depth, and audience. `defaults()` is the chip default. |
+| `PreProfile` | Intake shape: nullable title and topic, plus domain, goal, interactivity, type, depth, theme, and audience. `defaults()` is the chip default, including theme `LIGHT`. |
 | `ProfileChoice` | Chip contract: `wireValue()` and `label()`. |
 | `Domain` | `java`, `spring-boot`, `python`, `ml`, `react`. Default `java`. |
 | `Goal` | `explain-flow`, `use-case`, `compare`, `layers`, `other`. Default `explain-flow`. |
 | `Interactivity` | `static`, `step-by-step`, `multi-scenario`. Default `step-by-step`. |
 | `DiagramType` | `auto`, `horizontal-steps`, `u-shape`, `pyramid`. Default `auto`. No comparison value. |
 | `Depth` | `overview`, `with-code`, `with-code-parallels`. Default `with-code`. |
+| `Theme` | `light`, `dark`. Default `light`. Valid with every type and every interactivity. |
 | `Audience` | `beginner`, `intermediate`. Default `beginner`. |
-| `DomainOption`, `GoalOption`, `InteractivityOption`, `DiagramTypeOption`, `DepthOption`, `AudienceOption` | One chip: enum id, label, wire value, and whether it is the default. |
+| `DomainOption`, `GoalOption`, `InteractivityOption`, `DiagramTypeOption`, `DepthOption`, `ThemeOption`, `AudienceOption` | One chip: enum id, label, wire value, and whether it is the default. |
 | `CombinationRule` | One catalog row: match fields, chips to disable, optional forced type, tooltip. |
 | `ProfileCatalog` | Defaults, every chip group, and the rules, shared with the browser. |
 | `ResolvedProfile` | Profile after the rules, plus disabled-chip tooltips. |
-| `ProfileCombinationCatalog` | The rule list. `catalog()` publishes it. `resolve(PreProfile)` forces a type, then collects disables. |
+| `ProfileCombinationCatalog` | The rule list. `catalog()` publishes it. `resolve(PreProfile)` forces a type, then collects disables. Theme has no row. |
+
+### Theme tokens
+
+| Class | What it does |
+| --- | --- |
+| `dev.diagrammer.theme.DiagramThemeTokens` | Reads `src/main/resources/META-INF/resources/diagram-theme.css`. `stylesheet()` is that text for the renderer to inline. `cssClass(Theme)` is `diagram-theme-light` or `diagram-theme-dark`. `tokens(Theme)` is the custom properties for one palette. |
 
 ## Hilla endpoints
 
@@ -77,7 +85,7 @@ File routes from `src/main/frontend/views/`. `routes.tsx` sends anonymous users 
 | Route | File | What it does |
 | --- | --- | --- |
 | `/login` | `views/login.tsx` | Login overlay. Skips the app layout. Calls `useAuth().login`. |
-| `/` | `views/@index.tsx` | Diagram Orchestrator. Login required. Chip intake, live Pre-Profile card, disabled Confirm & Generate, profile-assistant placeholder. |
+| `/` | `views/@index.tsx` | Diagram Orchestrator. Login required. Chip intake, including the Theme chip after Depth and outside Advanced, a live Pre-Profile card, a theme preview card, disabled Confirm & Generate, and a profile-assistant placeholder. |
 | layout | `views/@layout.tsx` | App shell: brand, display name, Log out, and the view outlet. |
 
 | File | What it does |
@@ -88,9 +96,10 @@ File routes from `src/main/frontend/views/`. `routes.tsx` sends anonymous users 
 | `routes.tsx` | Builds the file router and protects routes with `/login`. |
 | `profile/ChipGroup.tsx` | Single-select radio chips. A disabled chip keeps a tooltip. |
 | `profile/applyCatalog.ts` | Browser copy of `ProfileCombinationCatalog.resolve`. |
-| `META-INF/resources/styles.css` | Layout for the app shell, chips, Pre-Profile card, and assistant panel. |
+| `META-INF/resources/styles.css` | Layout for the app shell, chips, Pre-Profile card, theme preview, and assistant panel. |
+| `src/main/resources/META-INF/resources/diagram-theme.css` | The only copy of the light and dark diagram palettes. Custom properties on `.diagram-theme-light` and `.diagram-theme-dark`. |
 
-`PreProfileCard` is a function inside `views/@index.tsx`, not its own file. Title and topic render as `not set yet`.
+`PreProfileCard` and `ThemePreview` are functions inside `views/@index.tsx`, not their own files. Title and topic render as `not set yet`. `ThemePreview` shows a title, a step chip, a code line, and an accent button in the selected palette.
 
 ## Config and profiles
 
@@ -131,8 +140,11 @@ Backend tests are JUnit under `src/test/java/`. There is no frontend test runner
 | --- | --- |
 | `LoginSmokeTest` | S1 HTTP smoke on the `test` profile. Anonymous `/` redirects to `/login`. Fixture login returns the current user. A wrong password stays logged out (401). Logout returns to `/login`, and the endpoint then returns 401. `GET /diagrams/anything` is 404 `Diagram not found` without login. |
 | `HealthEndpointTest` | `GET /actuator/health` is public and hides details. Other actuator paths are not exposed. `/` still requires login. |
-| `OrchestratorSmokeTest` | S2 browser smoke. Signs in once through the login form, then checks default chips, the Pre-Profile card, chip updates, v1 types only, pyramid versus multi-scenario, and compare staying on auto. Anonymous `catalog()` is rejected. |
-| `ProfileCombinationCatalogTest` | Defaults, chip order and wire values, no comparison type, unique rule ids, static and step-by-step with every type, pyramid/multi-scenario, compare forces auto, other goals do not. |
+| `SignedInBrowser` | Test helper in `src/test/java/dev/diagrammer/SignedInBrowser.java`. Posts the fixture login and copies the session cookie into a Playwright context, so a feature test opens already signed in. |
+| `OrchestratorSmokeTest` | S2 and S15 browser smoke. Starts already signed in through `SignedInBrowser`, then checks default chips including Theme Light, the Pre-Profile card, chip updates, Dark updating the card and the preview, v1 types only, pyramid versus multi-scenario, and compare staying on auto. Anonymous `catalog()` is rejected. The app shell stays light. |
+| `ProfileCombinationCatalogTest` | Defaults, chip order and wire values, no comparison type, unique rule ids, static and step-by-step with every type, pyramid/multi-scenario, compare forces auto, other goals do not, and theme stays for every type and interactivity. |
+| `PreProfileTest` | `PreProfile` serializes `theme` as `LIGHT` or `DARK`. |
+| `DiagramThemeTokensTest` | Light and dark define the same custom-property keys, and the colors match `diagram-theme.css`. |
 | `S3UserStoreTest` | Reads `auth/users.json`. Rejects a non-array file, a password without `{noop}`, and a user missing `displayName`. |
 | `UserStoragePrefixTest` | `users/{userId}/`, the logged-in user, and a user id that could escape the folder. |
 | `UserStoreProfileGuardTest` | No profile and no S3 env fails closed. Bucket without region does not activate `s3`. Both env vars activate `s3`. An explicit `local` profile stays on the fixture. |
@@ -150,4 +162,4 @@ Decided in [ARCHITECTURE.md](ARCHITECTURE.md), and absent from this tree:
 - Storing diagram HTML, Pre-Profile JSON, or DiagramSpec JSON in S3. S3 is used for `auth/users.json` only. `UserStoragePrefix` builds `users/{userId}/` and nothing under it is written.
 - Public diagram pages. `/diagrams/**` is a 404 placeholder.
 - Content-Security-Policy, HTML sanitizing, and a sandboxed iframe preview.
-- A light/dark control for generated diagrams. The shell document sets `theme="light"` ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
+- Generated pages that apply the selected palette. The Theme chip and `ThemePreview` are in `views/@index.tsx`. The shell document stays `theme="light"` ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
