@@ -22,3 +22,5 @@ Decision 2 chose Railway. The host is now Render. GitHub remains the source Rend
 ## Notes
 
 - **Relation:** Supersedes decision 2. Decisions 8 and 21 still stand for GitHub as the source of truth. This entry replaces Railway with Render as the builder those entries named. Clarifies decision 26: those variables are Render environment variables.
+
+Note (2026-10-20): "Render deploys from GitHub, branch `main`" does not mean pushes to `main` auto-deployed before 2026-10-19 20:00 Europe/Madrid. See [0037](0037-render-deploys-via-the-github-app.md).

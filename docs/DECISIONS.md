@@ -1,18 +1,18 @@
 # Decisions
 
-The decision files under `docs/decisions/` and [ARCHITECTURE.md](ARCHITECTURE.md) are the shared source of truth.
+The decision files under `docs/decisions/` and [ARCHITECTURE.md](ARCHITECTURE.md) are the shared source of truth. Code memory for agents is [AGENTS.md](../AGENTS.md) and [CODEMAP.md](CODEMAP.md) ([0034](decisions/process/0034-code-memory-for-agents.md)).
 
 ## Status by domain
 
 | Domain | Active decisions | Superseded | Open questions | Last updated |
 | --- | --- | --- | --- | --- |
 | [architecture](#architecture) | [0001](decisions/architecture/0001-hilla-full-stack.md) | — | 0 | 2026-10-18 |
-| [front](#front) | [0015](decisions/front/0015-light-and-dark-themes.md) | — | Arrow and SVG geometry | 2026-10-18 |
+| [front](#front) | [0015](decisions/front/0015-light-and-dark-themes.md), [0035](decisions/front/0035-themes-only-on-generated-diagrams.md) | — | Arrow and SVG geometry | 2026-10-20 |
 | [back](#back) | [0010](decisions/back/0010-grok-models-on-bedrock.md) | — | 0 | 2026-10-18 |
 | [aws](#aws) | [0005](decisions/aws/0005-s3-for-user-generated-documents.md), [0006](decisions/aws/0006-bedrock-for-model-calls.md), [0012](decisions/aws/0012-one-s3-bucket-folders-per-user-and-diagram.md), [0023](decisions/aws/0023-aws-region-eu-central-1.md), [0024](decisions/aws/0024-private-bucket-and-key-layout.md), [0025](decisions/aws/0025-iam-user-diagrammer-app.md), [0026](decisions/aws/0026-configuration-by-environment-variables.md) | — | Exact diagram URL form; limits and cost; exact Bedrock model id; Bedrock permissions | 2026-10-18 |
-| [devops](#devops) | [0027](decisions/devops/0027-java-21-maven-3-9-node-24.md), [0029](decisions/devops/0029-framework-and-library-versions.md), [0030](decisions/devops/0030-deploy-on-render.md), [0031](decisions/devops/0031-render-service-shape.md), [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md) | [0002](decisions/devops/0002-deploy-on-railway.md) | 0 | 2026-10-18 |
+| [devops](#devops) | [0027](decisions/devops/0027-java-21-maven-3-9-node-24.md), [0029](decisions/devops/0029-framework-and-library-versions.md), [0030](decisions/devops/0030-deploy-on-render.md), [0031](decisions/devops/0031-render-service-shape.md), [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md), [0037](decisions/devops/0037-render-deploys-via-the-github-app.md) | [0002](decisions/devops/0002-deploy-on-railway.md) | 0 | 2026-10-20 |
 | [security](#security) | [0004](decisions/security/0004-auth-without-cognito.md), [0013](decisions/security/0013-json-credentials-file.md), [0016](decisions/security/0016-safe-diagram-output.md) | — | Amazon Cognito may be considered later; password hashing backlog | 2026-10-18 |
-| [process](#process) | [0007](decisions/process/0007-repo-docs-are-the-shared-memory.md), [0008](decisions/process/0008-public-github-repo-on-main.md), [0021](decisions/process/0021-github-is-the-source-of-truth.md), [0022](decisions/process/0022-release-versioning-starts-at-v0-0-1.md), [0028](decisions/process/0028-application-code-in-diagrammer-code-project.md) | [0003](decisions/process/0003-cursor-origin-for-pull-requests.md) | 0 | 2026-10-18 |
+| [process](#process) | [0007](decisions/process/0007-repo-docs-are-the-shared-memory.md), [0008](decisions/process/0008-public-github-repo-on-main.md), [0021](decisions/process/0021-github-is-the-source-of-truth.md), [0022](decisions/process/0022-release-versioning-starts-at-v0-0-1.md), [0028](decisions/process/0028-application-code-in-diagrammer-code-project.md), [0034](decisions/process/0034-code-memory-for-agents.md), [0036](decisions/process/0036-story-smoke-tests-start-signed-in.md) | [0003](decisions/process/0003-cursor-origin-for-pull-requests.md) | 0 | 2026-10-20 |
 | [product](#product) | [0009](decisions/product/0009-generated-html-pipeline.md), [0011](decisions/product/0011-templates-by-default-llm-render-on-opt-in.md), [0014](decisions/product/0014-public-diagram-urls.md), [0017](decisions/product/0017-layouts-in-v1.md), [0018](decisions/product/0018-templates-fix-reference-quirks.md), [0019](decisions/product/0019-english-output-i18n-ready.md), [0020](decisions/product/0020-user-typed-diagram-title.md), [0033](decisions/product/0033-pre-profile-chip-values.md) | — | Spring Boot and Python topic placeholders; diagram deletion | 2026-10-19 |
 
 ### architecture
@@ -25,13 +25,13 @@ Last updated: 2026-10-18
 
 ### front
 
-Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)).
+Generated diagrams support a light theme and a dark theme ([0015](decisions/front/0015-light-and-dark-themes.md)). Those themes apply only to generated diagrams and their preview; the app shell stays light ([0035](decisions/front/0035-themes-only-on-generated-diagrams.md)).
 
 Open questions:
 
 - Arrow and SVG geometry. Computed from the layout, or hand-placed like the reference. Not chosen ([ARCHITECTURE.md](ARCHITECTURE.md#open-questions--tbd)).
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 ### back
 
@@ -78,9 +78,11 @@ The `diagrammer` service runs on the free plan in Frankfurt at https://diagramme
 
 Render deploys only when files under `diagrammer-code-project/` change, ignoring `diagrammer-code-project/**/*.md` and everything outside that folder ([0032](decisions/devops/0032-render-deploys-only-for-app-changes.md)).
 
+Before 2026-10-19 20:00 Europe/Madrid, Render was linked by public repo URL, not through the Render GitHub app, so pushes did not auto-deploy. The GitHub app is connected, and the build filter is paths `diagrammer-code-project/**` and ignoredPaths `diagrammer-code-project/**/*.md`. Push auto-deploy is expected and unproven until the v0.0.3 code merge. Manual deploys are the fallback ([0037](decisions/devops/0037-render-deploys-via-the-github-app.md)).
+
 No open questions are recorded for this domain.
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 ### security
 
@@ -99,7 +101,7 @@ Last updated: 2026-10-18
 
 ### process
 
-The shared source of truth is ARCHITECTURE.md and this decision log, and there is no knowledge-graph tool for now ([0007](decisions/process/0007-repo-docs-are-the-shared-memory.md)).
+The shared source of truth is ARCHITECTURE.md and this decision log, and there is no knowledge-graph tool for now ([0007](decisions/process/0007-repo-docs-are-the-shared-memory.md)). Code memory for agents is [AGENTS.md](../AGENTS.md) and [CODEMAP.md](CODEMAP.md), kept by diag-documenter and updated in the same PR, or a follow-up docs PR, when code structure changes ([0034](decisions/process/0034-code-memory-for-agents.md)).
 
 The repository is the public GitHub repo [AlbertProfe/diagrammer](https://github.com/AlbertProfe/diagrammer), the default branch is `main`, and the deploy builder is Render ([0008](decisions/process/0008-public-github-repo-on-main.md), [0030](decisions/devops/0030-deploy-on-render.md)).
 
@@ -109,9 +111,11 @@ App release versioning starts at `v0.0.1`, tracked with `release/vX.Y.Z` labels 
 
 Application code lives in `diagrammer-code-project/`, next to `docs/` ([0028](decisions/process/0028-application-code-in-diagrammer-code-project.md)).
 
+Story smoke tests start signed in, and login is tested only by S1's tests ([0036](decisions/process/0036-story-smoke-tests-start-signed-in.md)).
+
 No open questions are recorded for this domain.
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 ### product
 
@@ -144,7 +148,7 @@ diag-lead assigns the next number, so two bots never take the same one. Create o
 
 The file has the full front matter: `number`, `title`, `date`, `domain`, `status` (`active` or `superseded`), `supersedes`, `superseded_by`, `refines`, `relates_to`, and `tags` when the decision touches other domains. The body has Decision, Rationale, and any notes.
 
-Never edit or delete an old decision's text. To change a decision, add a new one with `supersedes`, and on the old file change only `status` and `superseded_by`. Dated notes are allowed.
+Never edit or delete an old decision's text. To change a decision, add a new one with `supersedes`, and on the old file change only `status` and `superseded_by`. Dated notes are allowed. Secret values (passwords, keys, tokens, hook URLs) found in a decision may be redacted: replace the value with a pointer to where it lives and add a dated note saying it was redacted. This is the only exception to append-only.
 
 Whoever adds or supersedes a decision also updates that domain's Status by domain summary and its Last updated date in the same PR. If the old decision sits in another domain, update that domain's summary and date too.
 
@@ -163,6 +167,7 @@ Active decisions only.
 ### front
 
 - [0015 Light and dark themes](decisions/front/0015-light-and-dark-themes.md)
+- [0035 Themes apply only to generated diagrams](decisions/front/0035-themes-only-on-generated-diagrams.md)
 
 ### back
 
@@ -185,6 +190,7 @@ Active decisions only.
 - [0030 Deploy on Render](decisions/devops/0030-deploy-on-render.md)
 - [0031 Render service shape](decisions/devops/0031-render-service-shape.md)
 - [0032 Render deploys only for app changes](decisions/devops/0032-render-deploys-only-for-app-changes.md)
+- [0037 Render deploys via the GitHub app; push auto-deploy not yet proven](decisions/devops/0037-render-deploys-via-the-github-app.md)
 
 ### security
 
@@ -199,6 +205,8 @@ Active decisions only.
 - [0021 GitHub is the source of truth](decisions/process/0021-github-is-the-source-of-truth.md)
 - [0022 Release versioning starts at v0.0.1](decisions/process/0022-release-versioning-starts-at-v0-0-1.md)
 - [0028 Application code lives in diagrammer-code-project](decisions/process/0028-application-code-in-diagrammer-code-project.md)
+- [0034 Code memory for agents is AGENTS.md and CODEMAP.md](decisions/process/0034-code-memory-for-agents.md)
+- [0036 Story smoke tests start signed in](decisions/process/0036-story-smoke-tests-start-signed-in.md)
 
 ### product
 
@@ -248,3 +256,7 @@ Active decisions only.
 | [0031](decisions/devops/0031-render-service-shape.md) | devops | [Render service shape](decisions/devops/0031-render-service-shape.md) | active |
 | [0032](decisions/devops/0032-render-deploys-only-for-app-changes.md) | devops | [Render deploys only for app changes](decisions/devops/0032-render-deploys-only-for-app-changes.md) | active |
 | [0033](decisions/product/0033-pre-profile-chip-values.md) | product | [Pre-Profile chip values](decisions/product/0033-pre-profile-chip-values.md) | active |
+| [0034](decisions/process/0034-code-memory-for-agents.md) | process | [Code memory for agents is AGENTS.md and CODEMAP.md](decisions/process/0034-code-memory-for-agents.md) | active |
+| [0035](decisions/front/0035-themes-only-on-generated-diagrams.md) | front | [Themes apply only to generated diagrams](decisions/front/0035-themes-only-on-generated-diagrams.md) | active |
+| [0036](decisions/process/0036-story-smoke-tests-start-signed-in.md) | process | [Story smoke tests start signed in](decisions/process/0036-story-smoke-tests-start-signed-in.md) | active |
+| [0037](decisions/devops/0037-render-deploys-via-the-github-app.md) | devops | [Render deploys via the GitHub app; push auto-deploy not yet proven](decisions/devops/0037-render-deploys-via-the-github-app.md) | active |
