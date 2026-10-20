@@ -4,6 +4,8 @@ Diagrammer generates self-contained interactive HTML diagrams in the style of th
 
 Before working, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DECISIONS.md](docs/DECISIONS.md), and [docs/CODEMAP.md](docs/CODEMAP.md).
 
+The user guide is [docs/user-guide/](docs/user-guide/README.md).
+
 Application code lives in `diagrammer-code-project/`. The React frontend is `diagrammer-code-project/src/main/frontend/`.
 
 Run locally from `diagrammer-code-project/`:
