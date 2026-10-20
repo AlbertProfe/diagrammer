@@ -24,3 +24,5 @@ Decision 30 left the service shape open. The merged [`render.yaml`](../../../ren
 - **Relation:** Refines decision 30. Supersedes TBD: Render service shape
 
 Note (2026-10-18): healthCheckPath=/actuator/health is now set in the Render dashboard; the redeploy was verified 200 UP at 15:42 Europe/Madrid on 2026-10-18.
+
+Note (2026-10-20): "It auto-deploys from `main`" does not mean pushes to `main` auto-deployed before 2026-10-19 20:00 Europe/Madrid. See [0037](0037-render-deploys-via-the-github-app.md).

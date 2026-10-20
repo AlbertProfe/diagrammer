@@ -4,10 +4,12 @@ Diagrammer generates self-contained interactive HTML diagrams in the style of th
 
 It is one Vaadin Hilla project: a Spring Boot backend and a React frontend talking through Hilla endpoints. Documents are stored in AWS S3. Model calls use Grok on AWS Bedrock. The app is deployed on Render.
 
-[Architecture](docs/ARCHITECTURE.md) and the decision files under [docs/decisions/](docs/decisions/) are the shared source of truth. Every bot on the team (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads the architecture and the decision log before working.
+[Architecture](docs/ARCHITECTURE.md) and the decision files under [docs/decisions/](docs/decisions/) are the shared source of truth. [AGENTS.md](AGENTS.md) and [CODEMAP.md](docs/CODEMAP.md) are the code memory for agents. Every bot on the team (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads them before working.
 
+- [AGENTS.md](AGENTS.md): short guide for cloud agents
 - [Architecture](docs/ARCHITECTURE.md): the intended design
 - [Decisions](docs/DECISIONS.md): index of the decision log. Each decision is one file under [docs/decisions/](docs/decisions/).
+- [Code map](docs/CODEMAP.md): skimmable map of the current code
 
 ## Application code
 
