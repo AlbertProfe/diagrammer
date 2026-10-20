@@ -24,7 +24,7 @@ The user types the diagram title. Diagram output is English only. The app is i18
 Guided intake → Pre-Profile JSON → Planner → DiagramSpec JSON → Renderer → HTML.
 
 1. **Guided intake.** Vaadin chips plus a narrow profile-assistant chat. The chat only completes the profile. It does not design the diagram, write the spec, or write HTML. It asks for the topic, asks at most one clarifying question when the topic is vague, and echoes a profile summary.
-2. **Pre-Profile JSON.** The backend validates it, fills defaults, and, when the diagram type is Auto, suggests a layout. The planner is not called without a topic.
+2. **Pre-Profile JSON.** The backend validates it, fills defaults, and, when the diagram type is Auto, suggests a layout. Backend Pre-Profile validation is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card. The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card. The planner is not called without a topic.
 3. **Planner.** The JSON planner produces a DiagramSpec: structured text and code only, no raw HTML.
 4. **Renderer.** Deterministic templates are filled from the DiagramSpec by default. The user can opt to have an LLM render instead. That opt-in uses the diagrammer/renderer model role.
 5. **Store.** That version's HTML is stored in the private bucket, and the app serves it at a public URL. See [Storage](#storage).
@@ -55,7 +55,7 @@ The longer goal values `walk-through-use-case`, `compare-concepts`, and `show-la
 
 Comparison is a v2 / future layout. It is not a type chip in v0.0.2.
 
-When the type is Auto, the suggested layout is `explain-flow` → horizontal steps, `use-case` → U-shape, and `layers` → pyramid. Suggesting comparison for `compare` waits until that v2 layout exists.
+When the type is Auto, the suggested layout is `explain-flow` → horizontal steps, `use-case` → U-shape, and `layers` → pyramid. Suggesting comparison for `compare` waits until that v2 layout exists. The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card.
 
 Topic placeholders the chat can show:
 

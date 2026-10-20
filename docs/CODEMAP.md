@@ -141,6 +141,8 @@ Backend tests are JUnit under `src/test/java/`. There is no frontend test runner
 
 Decided in [ARCHITECTURE.md](ARCHITECTURE.md), and absent from this tree:
 
+- Backend Pre-Profile validation is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card.
+- The auto-layout suggestion (explain-flow → horizontal steps, use-case → U-shape, and layers → pyramid) is planned, not yet implemented (no story assigned yet). It is not part of v0.0.3, which is only the Theme chip, light/dark tokens and the preview card.
 - Profile-assistant chat. The orchestrator shows the text "Profile assistant coming soon".
 - Confirm & Generate. The button is disabled.
 - Planner, DiagramSpec, template renderer, and opt-in LLM HTML.
