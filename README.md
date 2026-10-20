@@ -6,6 +6,7 @@ It is one Vaadin Hilla project: a Spring Boot backend and a React frontend talki
 
 [Architecture](docs/ARCHITECTURE.md) and the decision files under [docs/decisions/](docs/decisions/) are the shared source of truth. Every bot on the team (product owner, tech lead, coder, devops, reviewer, documenter, QA) reads the architecture and the decision log before working.
 
+- [User guide](docs/user-guide/README.md): how to sign in and start a diagram (v0.0.2)
 - [Architecture](docs/ARCHITECTURE.md): the intended design
 - [Decisions](docs/DECISIONS.md): index of the decision log. Each decision is one file under [docs/decisions/](docs/decisions/).
 
