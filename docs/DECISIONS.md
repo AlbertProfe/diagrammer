@@ -148,7 +148,7 @@ diag-lead assigns the next number, so two bots never take the same one. Create o
 
 The file has the full front matter: `number`, `title`, `date`, `domain`, `status` (`active` or `superseded`), `supersedes`, `superseded_by`, `refines`, `relates_to`, and `tags` when the decision touches other domains. The body has Decision, Rationale, and any notes.
 
-Never edit or delete an old decision's text. To change a decision, add a new one with `supersedes`, and on the old file change only `status` and `superseded_by`. Dated notes are allowed.
+Never edit or delete an old decision's text. To change a decision, add a new one with `supersedes`, and on the old file change only `status` and `superseded_by`. Dated notes are allowed. Secret values (passwords, keys, tokens, hook URLs) found in a decision may be redacted: replace the value with a pointer to where it lives and add a dated note saying it was redacted. This is the only exception to append-only.
 
 Whoever adds or supersedes a decision also updates that domain's Status by domain summary and its Last updated date in the same PR. If the old decision sits in another domain, update that domain's summary and date too.
 
